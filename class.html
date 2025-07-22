@@ -66,7 +66,6 @@
             gap: 10px;
             padding: 5px 20px; /* 좌우 여백 추가 */
         }
-        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
         .shortcut-buttons .shortcut-btn {
             background-color: #e0e0e0;
@@ -150,6 +149,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatInput = document.getElementById('chat-input');
     const shortcutAnswerBtn = document.getElementById('shortcut-answer');
     const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
+    // ▼▼▼ JavaScript 수정: 누락된 단축키 버튼 요소 추가 ▼▼▼
+    const shortcutAnalyzeBtn = document.getElementById('shortcut-analyze'); 
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     let chatHistory = [];
     let selectedFile = null;
@@ -190,10 +192,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleSend();
     });
 
-    shortcutanalyzeBtn.addEventListener('click', () => {
+    // ▼▼▼ JavaScript 수정: 단축키 버튼 이벤트 리스너 이름 변경 (오타 수정) ▼▼▼
+    shortcutAnalyzeBtn.addEventListener('click', () => {
         chatInput.value = '틀린 이유를 분석해주세요.';
         handleSend();
     });
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     async function handleSend() {
         const userText = chatInput.value.trim();
@@ -318,6 +322,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         uploadBtn.disabled = disabled;
         shortcutAnswerBtn.disabled = disabled;
         shortcutMoreProblemBtn.disabled = disabled;
+        // ▼▼▼ JavaScript 수정: 단축키 버튼 활성/비활성화 추가 (누락된 요소) ▼▼▼
+        shortcutAnalyzeBtn.disabled = disabled;
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     }
 });
 </script>

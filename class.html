@@ -8,28 +8,21 @@
         :root { --primary-color: #FD312E; /* Active Red */ --danger-color: #A50034; /* Heritage Red */ --model-bg: #F0ECE4; /* Warm Gray */ --white-color: #FFFFFF; /* White */ --dark-color: #000000; /* Black */ }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* ▼▼▼ CSS 수정: 불필요한 스크롤 방지 ▼▼▼ */
-        html {
-            height: 100%; /* HTML 요소가 뷰포트 높이를 꽉 채우도록 */
-            overflow: hidden; /* HTML 요소 자체의 스크롤바 숨김 */
-        }
-        body {
-            width: 100%;
-            height: 100%; /* Body 요소가 HTML 요소 높이를 꽉 채우도록 */
+        /* ▼▼▼ CSS 수정: html, body 고정 및 오버플로우 숨김 ▼▼▼ */
+        html, body { 
+            width: 100%; 
+            height: 100%; /* 화면 높이에 꽉 채우기 */
             font-family: 'Malgun Gothic', sans-serif; 
             background-color: var(--white-color);
-            margin: 0; /* 기본 마진 제거 */
-            padding: 0; /* 기본 패딩 제거 */
+            overflow: hidden; /* body의 스크롤바를 숨겨서 불필요한 여백 발생 방지 */
         }
+        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+
         .hidden { display: none !important; }
         
-        #class-page { 
-            display: flex; flex-direction: column; 
-            height: 100%; /* Body 높이를 꽉 채우도록 */
-            /* #class-page 자체에는 overflow를 설정하지 않습니다. */
-            /* 내부의 main 요소가 스크롤을 담당합니다. */
-        }
-        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+        /* ▼▼▼ CSS 수정: class-page 높이 100%로 변경 ▼▼▼ */
+        #class-page { display: flex; flex-direction: column; height: 100%; }
+        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
         header {
             flex-shrink: 0; background: white; padding: 15px 20px;
@@ -84,6 +77,11 @@
             justify-content: flex-start;
             gap: 10px;
             padding: 5px 20px;
+            overflow-x: auto; /* 단축키가 많아지면 스크롤되도록 */
+            -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
+        }
+        .shortcut-buttons::-webkit-scrollbar {
+            display: none; /* 스크롤바 숨기기 */
         }
 
         .shortcut-buttons .shortcut-btn {
@@ -94,8 +92,8 @@
             padding: 8px 15px;
             font-size: 0.9em;
             cursor: pointer;
-            white-space: nowrap;
             transition: background-color 0.2s, color 0.2s;
+            white-space: nowrap;
         }
         .shortcut-buttons .shortcut-btn:hover {
             background-color: #ccc;
@@ -337,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         uploadBtn.disabled = disabled;
         shortcutAnswerBtn.disabled = disabled;
         shortcutMoreProblemBtn.disabled = disabled;
-        shortcutAnalyzeBtn.disabled = disabled; /* Corrected variable name */
+        shortcutAnalyzeBtn.disabled = disabled;
     }
 });
 </script>

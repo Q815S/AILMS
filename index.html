@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Vercel과 Gemini 테스트</title>
+    <style>
+        body { font-family: sans-serif; container-type: inline-size; }
+        .container { max-width: 600px; margin: 40px auto; padding: 20px; }
+        textarea { width: 95%; min-height: 80px; margin-bottom: 10px; padding: 10px; }
+        button { padding: 10px 20px; }
+        #result { margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>간단한 Gemini 테스트</h1>
+        <p>궁금한 것을 물어보세요. Vercel 서버를 통해 Gemini가 답변해줍니다.</p>
+        
+        <textarea id="question-input" placeholder="예: 한국의 수도는 어디야?"></textarea>
+        <button id="ask-button">질문하기</button>
+
+        <h2>답변:</h2>
+        <div id="result">아직 답변이 없습니다.</div>
+    </div>
+
+    <script>
+        const questionInput = document.getElementById('question-input');
+        const askButton = document.getElementById('ask-button');
+        const resultDiv = document.getElementById('result');
+
+        // '질문하기' 버튼을 누르면 실행
+        askButton.addEventListener('click', async () => {
+            const question = questionInput.value;
+            if (!question) {
+                alert('질문을 입력해주세요.');
+                return;
+            }
+
+            // 사용자에게 대기 중임을 알림
+            resultDiv.textContent = '답변을 생성하는 중입니다... 잠시만 기다려주세요.';
+            askButton.disabled = true;
+
+            try {
+                // 🔽 우리 Vercel 서버의 API(/api/ask)로 요청을 보냄
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question }) // 질문을 JSON 형태로 서버에 전달
+                });
+
+                if (!response.ok) {
+                    throw new Error('서버에서 오류가 발생했습니다.');
+                }
+
+                const data = await response.json();
+                resultDiv.textContent = data.answer; // 서버가 보내준 답변을 화면에 표시
+
+            } catch (error) {
+                resultDiv.textContent = '오류: ' + error.message;
+            } finally {
+                askButton.disabled = false; // 버튼 다시 활성화
+            }
+        });
+    </script>
+</body>
+</html>

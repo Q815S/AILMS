@@ -7,10 +7,29 @@
     <style>
         :root { --primary-color: #FD312E; /* Active Red */ --danger-color: #A50034; /* Heritage Red */ --model-bg: #F0ECE4; /* Warm Gray */ --white-color: #FFFFFF; /* White */ --dark-color: #000000; /* Black */ }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; font-family: 'Malgun Gothic', sans-serif; background-color: var(--white-color); }
+        
+        /* ▼▼▼ CSS 수정: 불필요한 스크롤 방지 ▼▼▼ */
+        html {
+            height: 100%; /* HTML 요소가 뷰포트 높이를 꽉 채우도록 */
+            overflow: hidden; /* HTML 요소 자체의 스크롤바 숨김 */
+        }
+        body {
+            width: 100%;
+            height: 100%; /* Body 요소가 HTML 요소 높이를 꽉 채우도록 */
+            font-family: 'Malgun Gothic', sans-serif; 
+            background-color: var(--white-color);
+            margin: 0; /* 기본 마진 제거 */
+            padding: 0; /* 기본 패딩 제거 */
+        }
         .hidden { display: none !important; }
         
-        #class-page { display: flex; flex-direction: column; height: 100vh; }
+        #class-page { 
+            display: flex; flex-direction: column; 
+            height: 100%; /* Body 높이를 꽉 채우도록 */
+            /* #class-page 자체에는 overflow를 설정하지 않습니다. */
+            /* 내부의 main 요소가 스크롤을 담당합니다. */
+        }
+        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
         header {
             flex-shrink: 0; background: white; padding: 15px 20px;
@@ -62,9 +81,9 @@
         .shortcut-buttons {
             width: 100%;
             display: flex;
-            justify-content: flex-start; /* 왼쪽 정렬 */
+            justify-content: flex-start;
             gap: 10px;
-            padding: 5px 20px; /* 좌우 여백 추가 */
+            padding: 5px 20px;
         }
 
         .shortcut-buttons .shortcut-btn {
@@ -75,8 +94,8 @@
             padding: 8px 15px;
             font-size: 0.9em;
             cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
             white-space: nowrap;
+            transition: background-color 0.2s, color 0.2s;
         }
         .shortcut-buttons .shortcut-btn:hover {
             background-color: #ccc;
@@ -149,9 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatInput = document.getElementById('chat-input');
     const shortcutAnswerBtn = document.getElementById('shortcut-answer');
     const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
-    // ▼▼▼ JavaScript 수정: 누락된 단축키 버튼 요소 추가 ▼▼▼
     const shortcutAnalyzeBtn = document.getElementById('shortcut-analyze'); 
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     let chatHistory = [];
     let selectedFile = null;
@@ -192,12 +209,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleSend();
     });
 
-    // ▼▼▼ JavaScript 수정: 단축키 버튼 이벤트 리스너 이름 변경 (오타 수정) ▼▼▼
     shortcutAnalyzeBtn.addEventListener('click', () => {
         chatInput.value = '틀린 이유를 분석해주세요.';
         handleSend();
     });
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     async function handleSend() {
         const userText = chatInput.value.trim();
@@ -322,9 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         uploadBtn.disabled = disabled;
         shortcutAnswerBtn.disabled = disabled;
         shortcutMoreProblemBtn.disabled = disabled;
-        // ▼▼▼ JavaScript 수정: 단축키 버튼 활성/비활성화 추가 (누락된 요소) ▼▼▼
-        shortcutAnalyzeBtn.disabled = disabled;
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        shortcutAnalyzeBtn.disabled = disabled; /* Corrected variable name */
     }
 });
 </script>

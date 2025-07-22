@@ -2,65 +2,94 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Vercel과 Gemini 테스트</title>
+    <title>Gemini API 클라이언트</title>
     <style>
-        body { font-family: sans-serif; container-type: inline-size; }
-        .container { max-width: 600px; margin: 40px auto; padding: 20px; }
-        textarea { width: 95%; min-height: 80px; margin-bottom: 10px; padding: 10px; }
-        button { padding: 10px 20px; }
-        #result { margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px; white-space: pre-wrap; }
+        /* 페이지를 보기 좋게 꾸며주는 CSS 코드입니다 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            box-sizing: border-box; /* 패딩과 테두리를 너비에 포함시킴 */
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            white-space: pre-wrap; /* 줄바꿈과 공백을 그대로 표시 */
+            min-height: 50px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>간단한 Gemini 테스트</h1>
-        <p>궁금한 것을 물어보세요. Vercel 서버를 통해 Gemini가 답변해줍니다.</p>
-        
-        <textarea id="question-input" placeholder="예: 한국의 수도는 어디야?"></textarea>
-        <button id="ask-button">질문하기</button>
 
+    <div class="container">
+        <h1>Gemini에게 무엇이든 물어보세요</h1>
+        
+        <!-- 1. 질문 입력창 -->
+        <textarea id="question-input" placeholder="여기에 질문을 입력하세요... (예: 대한민국의 수도는 어디인가요?)"></textarea>
+        
+        <!-- 2. 전송 버튼 -->
+        <button id="ask-button">질문 보내기</button>
+
+        <!-- 3. 답변 표시 영역 -->
         <h2>답변:</h2>
-        <div id="result">아직 답변이 없습니다.</div>
+        <div id="result-area">아직 질문하지 않았습니다.</div>
     </div>
 
+    <!-- 
+        JavaScript 로직은 여기에 들어갑니다.
+        지금은 비워두고, 다음 단계에서 서버와 통신하는 코드를 추가할 것입니다.
+    -->
     <script>
-        const questionInput = document.getElementById('question-input');
-        const askButton = document.getElementById('ask-button');
-        const resultDiv = document.getElementById('result');
-
-        // '질문하기' 버튼을 누르면 실행
-        askButton.addEventListener('click', async () => {
-            const question = questionInput.value;
-            if (!question) {
-                alert('질문을 입력해주세요.');
-                return;
-            }
-
-            // 사용자에게 대기 중임을 알림
-            resultDiv.textContent = '답변을 생성하는 중입니다... 잠시만 기다려주세요.';
-            askButton.disabled = true;
-
-            try {
-                // 🔽 우리 Vercel 서버의 API(/api/ask)로 요청을 보냄
-                const response = await fetch('/api/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: question }) // 질문을 JSON 형태로 서버에 전달
-                });
-
-                if (!response.ok) {
-                    throw new Error('서버에서 오류가 발생했습니다.');
-                }
-
-                const data = await response.json();
-                resultDiv.textContent = data.answer; // 서버가 보내준 답변을 화면에 표시
-
-            } catch (error) {
-                resultDiv.textContent = '오류: ' + error.message;
-            } finally {
-                askButton.disabled = false; // 버튼 다시 활성화
-            }
-        });
+        // 다음 단계에서 채워넣을 예정입니다.
     </script>
+
 </body>
 </html>

@@ -3,18 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI 교실</title>
+    <title>AILMS Class By Q815S</title>
     <style>
-        /* ▼▼▼ 새로운 색상 테마 적용 ▼▼▼ */
-        :root { 
-            --primary-color: #FD312E; /* Active Red */
-            --danger-color: #A50034;   /* Heritage Red */
-            --model-bg: #F0ECE4;       /* Warm Gray */
-            --white-color: #FFFFFF;    /* White */
-            --dark-color: #000000;     /* Black */
-        }
-        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
-
+        :root { --primary-color: #FD312E; /* Active Red */ --danger-color: #A50034; /* Heritage Red */ --model-bg: #F0ECE4; /* Warm Gray */ --white-color: #FFFFFF; /* White */ --dark-color: #000000; /* Black */ }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; font-family: 'Malgun Gothic', sans-serif; background-color: var(--white-color); }
         .hidden { display: none !important; }
@@ -22,7 +13,7 @@
         #class-page { display: flex; flex-direction: column; height: 100vh; }
 
         header {
-            flex-shrink: 0; background: var(--white-color); padding: 15px 20px;
+            flex-shrink: 0; background: white; padding: 15px 20px;
             border-bottom: 1px solid #e0e0e0; display: flex; align-items: center;
         }
         #exit-class-btn {
@@ -64,9 +55,42 @@
         }
 
         footer {
-            flex-shrink: 0; background: var(--white-color); border-top: 1px solid #e0e0e0;
-            padding: 10px; display: flex; align-items: center; gap: 10px;
+            flex-shrink: 0; background: white; border-top: 1px solid #e0e0e0;
+            padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
+        
+        /* ▼▼▼ CSS 수정: 단축키 버튼 컨테이너 왼쪽 정렬 ▼▼▼ */
+        .shortcut-buttons {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            gap: 10px;
+            padding: 5px 20px; /* 좌우 여백 추가 */
+        }
+        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+
+        .shortcut-buttons .shortcut-btn {
+            background-color: #e0e0e0;
+            color: #555;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            white-space: nowrap;
+        }
+        .shortcut-buttons .shortcut-btn:hover {
+            background-color: #ccc;
+        }
+
+        .chat-input-area {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 10px;
+        }
+
         #chat-input {
             flex-grow: 1; border: 1px solid #ccc; border-radius: 25px;
             padding: 12px 20px; font-size: 1em; resize: none;
@@ -101,12 +125,18 @@
     </header>
     <main id="chat-container"></main>
     <footer>
-        <input type="file" id="image-upload-input" class="hidden" accept="image/*">
-        <button id="upload-btn" class="chat-btn" title="사진 업로드">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 5H4V19L13.2923 9.70649C13.6828 9.31596 14.316 9.31596 14.7065 9.70649L20 15.0104V5ZM2 3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44476 22 3.9934V20.0066C22 20.5552 21.556 21 21.0082 21H2.9918C2.45531 21 2 20.5552 2 20.0066V3.9934ZM8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11Z"></path></svg>
-        </button>
-        <textarea id="chat-input" placeholder="질문이나 요청사항을 입력하세요..." rows="1"></textarea>
-        <button id="send-btn" class="chat-btn" title="보내기">보내기</button>
+        <div class="shortcut-buttons">
+            <button id="shortcut-answer" class="shortcut-btn">정답을 알려주세요!</button>
+            <button id="shortcut-more-problem" class="shortcut-btn">추가 문제를 내주세요.</button>
+        </div>
+        <div class="chat-input-area">
+            <input type="file" id="image-upload-input" class="hidden" accept="image/*">
+            <button id="upload-btn" class="chat-btn" title="사진 업로드">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 5H4V19L13.2923 9.70649C13.6828 9.31596 14.316 9.31596 14.7065 9.70649L20 15.0104V5ZM2 3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44476 22 3.9934V20.0066C22 20.5552 21.556 21 21.0082 21H2.9918C2.45531 21 2 20.5552 2 20.0066V3.9934ZM8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11Z"></path></svg>
+            </button>
+            <textarea id="chat-input" placeholder="질문이나 요청사항을 입력하세요..." rows="1"></textarea>
+            <button id="send-btn" class="chat-btn" title="보내기">보내기</button>
+        </div>
     </footer>
 </div>
 
@@ -118,7 +148,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const uploadBtn = document.getElementById('upload-btn');
     const imageUploadInput = document.getElementById('image-upload-input');
     const chatInput = document.getElementById('chat-input');
-    
+    const shortcutAnswerBtn = document.getElementById('shortcut-answer');
+    const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
+
     let chatHistory = [];
     let selectedFile = null;
 
@@ -146,6 +178,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             uploadBtn.style.backgroundColor = 'var(--primary-color)';
             uploadBtn.querySelector('svg').style.fill = 'white';
         }
+    });
+
+    shortcutAnswerBtn.addEventListener('click', () => {
+        chatInput.value = '정답을 알려주세요!';
+        handleSend();
+    });
+
+    shortcutMoreProblemBtn.addEventListener('click', () => {
+        chatInput.value = '추가 문제를 내주세요.';
+        handleSend();
     });
 
     async function handleSend() {
@@ -269,6 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatInput.disabled = disabled;
         sendBtn.disabled = disabled;
         uploadBtn.disabled = disabled;
+        shortcutAnswerBtn.disabled = disabled;
+        shortcutMoreProblemBtn.disabled = disabled;
     }
 });
 </script>

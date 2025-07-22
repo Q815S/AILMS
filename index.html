@@ -10,15 +10,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; font-family: 'Malgun Gothic', sans-serif; }
         
-        /* ▼▼▼ 배경 이미지 관련 스타일 제거 및 단색 배경 설정 ▼▼▼ */
         body {
             background-color: var(--light-color); /* Warm Gray */
-            /* 배경 이미지 관련 속성들을 모두 제거합니다. */
-            /* transition, background-image, background-position, background-repeat, background-size 삭제 */
         }
-        /* body.login-active 클래스도 더 이상 필요 없으므로 삭제합니다. */
-        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
-
         .container { 
             display: flex; justify-content: center; align-items: center; 
             width: 100%; min-height: 100vh; padding: 20px;
@@ -90,11 +84,11 @@
     <div class="card">
         <div id="login-screen">
             <h1>Welcome To AILMS!</h1>
-            <p>이름과 Gemini API 키를 입력해주세요.</p>
+            <p>이름과 Google Gemini API Key를 입력해주세요.</p>
             <form id="login-form">
                 <div class="form-group">
                     <label for="user-name">이름</label>
-                    <input type="text" id="user-name" placeholder="홍길동" required>
+                    <input type="text" id="user-name" placeholder="김엘지" required>
                 </div>
                 <div class="form-group">
                     <label for="api-key">Gemini API 키</label>

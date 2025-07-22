@@ -2,112 +2,193 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 문제 생성기</title>
-    <!-- <link rel="stylesheet" href="style.css"> 이 줄을 삭제하고 아래 style 태그로 대체 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 교실 - 문제 생성</title>
     <style>
+        :root { --primary-color: #FD312E; --dark-color: #000000; --light-color: #F0ECE4; --white-color: #FFFFFF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: 'Malgun Gothic', sans-serif; }
+        
+        /* ▼▼▼ 배경 이미지 스타일 추가 ▼▼▼ */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            background-color: var(--light-color); /* 메인 화면의 기본 배경색 */
+            transition: background-color 0.5s ease-in-out;
         }
-        .chat-container {
-            width: 90%;
-            max-width: 600px;
-            height: 80vh;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
+        body.login-active {
+            background-image: url('login_background.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
-        .header {
-            background-color: #4A90E2;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
+        body.login-active::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4); /* 반투명 검은색 오버레이 */
+            z-index: 0;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 1.2em;
+        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+
+        .container { 
+            display: flex; justify-content: center; align-items: center; 
+            width: 100%; min-height: 100vh; padding: 20px;
+            position: relative; z-index: 1; /* 오버레이 위에 컨텐츠가 오도록 설정 */
         }
-        .chat-box {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .card { width: 100%; max-width: 600px; background: var(--white-color); padding: 30px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .hidden { display: none; }
+
+        h1 { font-size: 2em; color: var(--dark-color); margin-bottom: 10px; text-align: center; }
+        p { color: #666; text-align: center; margin-bottom: 30px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; text-align: left; }
+        input[type="text"], input[type="password"], select, textarea {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 1em;
+            background-color: #fafafa;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
-        .message {
-            padding: 10px 15px;
-            border-radius: 18px;
-            max-width: 70%;
-            line-height: 1.4;
-            word-wrap: break-word; /* 긴 텍스트 자동 줄바꿈 */
+        input:focus, select:focus, textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(253, 49, 46, 0.2); outline: none; }
+        textarea { resize: vertical; min-height: 80px; }
+        .select-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+
+        .btn {
+            display: block; width: 100%; padding: 15px; font-size: 1.2em; font-weight: bold;
+            color: var(--white-color); background-color: var(--primary-color); border: none;
+            border-radius: 15px; cursor: pointer; transition: all 0.3s; margin-top: 30px;
         }
-        .user {
-            background-color: #4A90E2;
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        .ai {
-            background-color: #e9e9eb;
-            color: #333;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-        .loading {
-            color: #999;
-            font-style: italic;
-        }
-        .input-area {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid #ddd;
-        }
-        #user-input {
-            flex-grow: 1;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            padding: 10px 15px;
-            font-size: 1em;
-        }
-        #send-btn {
-            background-color: #4A90E2;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        #send-btn:hover {
-            background-color: #357ABD;
-        }
+        .btn:disabled { background-color: #aaa; cursor: not-allowed; }
+        .btn:not(:disabled):hover { opacity: 0.9; transform: translateY(-2px); }
     </style>
 </head>
-<body>
-    <div class="chat-container">
-        <div class="header">
-            <h1>AI 문제 생성기</h1>
+<!-- ▼▼▼ body에 login-active 클래스 추가 ▼▼▼ -->
+<body class="login-active">
+<div class="container">
+    <div class="card">
+        <div id="login-screen">
+            <h1>AI 교실 시작하기</h1>
+            <p>이름과 Gemini API 키를 입력해주세요.</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="user-name">이름</label>
+                    <input type="text" id="user-name" placeholder="홍길동" required>
+                </div>
+                <div class="form-group">
+                    <label for="api-key">Gemini API 키</label>
+                    <input type="password" id="api-key" placeholder="API 키를 여기에 붙여넣으세요" required>
+                </div>
+                <button type="submit" class="btn">AI 교실 입장하기</button>
+            </form>
         </div>
-        <div id="chat-box" class="chat-box">
-            <!-- 채팅 메시지가 여기에 추가됩니다 -->
-        </div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="문제 유형이나 키워드를 입력하세요 (예: '객관식 문제 내줘')">
-            <button id="send-btn">전송</button>
+        <div id="main-screen" class="hidden">
+            <h1 id="welcome-message"></h1>
+            <p>AI 선생님에게 요청할 문제의 범위를 선택해주세요.</p>
+            <form id="problem-form">
+                <div class="form-group select-group">
+                    <div>
+                        <label for="grade">학년</label>
+                        <select id="grade"><option value="중학교 1학년">1학년</option><option value="중학교 2학년">2학년</option><option value="중학교 3학년">3학년</option></select>
+                    </div>
+                    <div>
+                        <label for="semester">학기</label>
+                        <select id="semester"><option value="1학기">1학기</option><option value="2학기">2학기</option></select>
+                    </div>
+                    <div>
+                        <label for="unit">단원</label>
+                        <select id="unit"><option value="1단원">1단원</option><option value="2단원">2단원</option><option value="3단원">3단원</option><option value="4단원">4단원</option><option value="5단원">5단원</option></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="details">상세 내용 (선택 사항)</label>
+                    <textarea id="details" placeholder="예: 1단원 중 소인수분해 부분만 5문제 출제해줘. 난이도는 중급으로."></textarea>
+                </div>
+                <button id="generate-btn" type="submit" class="btn">문제 생성하기</button>
+            </form>
         </div>
     </div>
-    <script src="script.js"></script>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginScreen = document.getElementById('login-screen');
+        const mainScreen = document.getElementById('main-screen');
+        const loginForm = document.getElementById('login-form');
+        const apiKeyInput = document.getElementById('api-key');
+        const userNameInput = document.getElementById('user-name');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const problemForm = document.getElementById('problem-form');
+        const generateBtn = document.getElementById('generate-btn');
+        let isProblemGenerated = false;
+        
+        const savedApiKey = localStorage.getItem('geminiApiKey');
+        const savedUserName = localStorage.getItem('userName');
+        if (savedApiKey) { apiKeyInput.value = savedApiKey; }
+        if (savedUserName) { userNameInput.value = savedUserName; }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const apiKey = apiKeyInput.value.trim();
+            const userName = userNameInput.value.trim();
+            if (apiKey && userName) {
+                localStorage.setItem('geminiApiKey', apiKey);
+                localStorage.setItem('userName', userName);
+                showMainScreen(userName);
+            }
+        });
+
+        function showMainScreen(userName) {
+            welcomeMessage.textContent = `${userName}님, 환영합니다!`;
+            loginScreen.classList.add('hidden');
+            mainScreen.classList.remove('hidden');
+            // ▼▼▼ JavaScript 수정: 배경 이미지 제거 ▼▼▼
+            document.body.classList.remove('login-active');
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        }
+
+        problemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (isProblemGenerated) { window.location.href = 'class.html'; return; }
+            const grade = document.getElementById('grade').value;
+            const semester = document.getElementById('semester').value;
+            const unit = document.getElementById('unit').value;
+            const details = document.getElementById('details').value.trim();
+            let userPrompt = `${grade} ${semester} 수학 ${unit} 범위의 문제를 출제해줘.`;
+            if (details) { userPrompt += ` 추가적으로, ${details}`; }
+            
+            generateBtn.textContent = '문제 생성 중...';
+            generateBtn.disabled = true;
+            try {
+                const systemInstruction = "너는 중학생의 눈높이에 맞춰 설명하는 친절하고 유능한 수학 선생님이야. 모든 답변은 한국어로 하고, 단계별로 명확하게 설명해줘. 문제에는 번호를 붙이고, 풀이 과정과 정답을 명확히 구분해서 알려줘.";
+                const responseText = await callGeminiAPI(systemInstruction, userPrompt);
+                sessionStorage.setItem('initialProblem', responseText);
+                const initialHistory = [ { role: 'user', parts: [{ text: systemInstruction + "\n" + userPrompt }] }, { role: 'model', parts: [{ text: responseText }] } ];
+                sessionStorage.setItem('chatHistory', JSON.stringify(initialHistory));
+                isProblemGenerated = true;
+                generateBtn.textContent = '교실 입장하기';
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                alert(`문제 생성에 실패했습니다: ${error.message}\nAPI 키 또는 프롬프트를 확인해주세요.`);
+                generateBtn.textContent = '문제 생성하기';
+                isProblemGenerated = false;
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+        
+        async function callGeminiAPI(systemInstruction, userPrompt) {
+            const apiKey = localStorage.getItem('geminiApiKey');
+            if (!apiKey) throw new Error('API 키가 설정되지 않았습니다.');
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const requestBody = { "system_instruction": { "parts": [{"text": systemInstruction}] }, "contents": [{ "parts": [{"text": userPrompt}] }] };
+            const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+            const data = await response.json();
+            if (!response.ok) { throw new Error(data.error?.message || `HTTP error! status: ${response.status}`); }
+            if (data.candidates && data.candidates[0]?.content?.parts) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {  throw new Error('응답이 안전상의 이유로 차단되었습니다. 더 구체적인 내용을 입력해주세요.'); }
+                throw new Error('API로부터 유효한 응답을 받지 못했습니다.');
+            }
+        }
+    });
+</script>
 </body>
 </html>

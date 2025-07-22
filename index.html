@@ -2,94 +2,112 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Gemini API 클라이언트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 문제 생성기</title>
+    <!-- <link rel="stylesheet" href="style.css"> 이 줄을 삭제하고 아래 style 태그로 대체 -->
     <style>
-        /* 페이지를 보기 좋게 꾸며주는 CSS 코드입니다 */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f7f7f7;
         }
-        .container {
+        .chat-container {
             width: 90%;
             max-width: 600px;
-            padding: 30px;
-            background-color: white;
+            height: 80vh;
+            background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
         }
-        h1 {
-            font-size: 24px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        textarea {
-            width: 100%;
-            box-sizing: border-box; /* 패딩과 테두리를 너비에 포함시킴 */
-            min-height: 100px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
+        .header {
+            background-color: #4A90E2;
             color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:disabled {
-            background-color: #aaa;
-            cursor: not-allowed;
-        }
-        button:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-        #result-area {
-            margin-top: 20px;
             padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            white-space: pre-wrap; /* 줄바꿈과 공백을 그대로 표시 */
-            min-height: 50px;
-            line-height: 1.6;
+            text-align: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .chat-box {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            line-height: 1.4;
+            word-wrap: break-word; /* 긴 텍스트 자동 줄바꿈 */
+        }
+        .user {
+            background-color: #4A90E2;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .ai {
+            background-color: #e9e9eb;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .loading {
+            color: #999;
+            font-style: italic;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+        #user-input {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 1em;
+        }
+        #send-btn {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        #send-btn:hover {
+            background-color: #357ABD;
         }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>Gemini에게 무엇이든 물어보세요</h1>
-        
-        <!-- 1. 질문 입력창 -->
-        <textarea id="question-input" placeholder="여기에 질문을 입력하세요... (예: 대한민국의 수도는 어디인가요?)"></textarea>
-        
-        <!-- 2. 전송 버튼 -->
-        <button id="ask-button">질문 보내기</button>
-
-        <!-- 3. 답변 표시 영역 -->
-        <h2>답변:</h2>
-        <div id="result-area">아직 질문하지 않았습니다.</div>
+    <div class="chat-container">
+        <div class="header">
+            <h1>AI 문제 생성기</h1>
+        </div>
+        <div id="chat-box" class="chat-box">
+            <!-- 채팅 메시지가 여기에 추가됩니다 -->
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="문제 유형이나 키워드를 입력하세요 (예: '객관식 문제 내줘')">
+            <button id="send-btn">전송</button>
+        </div>
     </div>
-
-    <!-- 
-        JavaScript 로직은 여기에 들어갑니다.
-        지금은 비워두고, 다음 단계에서 서버와 통신하는 코드를 추가할 것입니다.
-    -->
-    <script>
-        // 다음 단계에서 채워넣을 예정입니다.
-    </script>
-
+    <script src="script.js"></script>
 </body>
 </html>

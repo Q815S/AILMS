@@ -98,17 +98,23 @@
         .chat-input-area {
             display: flex;
             width: 100%;
-            align-items: center;
+            align-items: center; /* 버튼과 텍스트 입력창을 세로 중앙 정렬 */
             gap: 10px;
         }
 
         /* textarea 자동 높이 조절을 위한 수정 */
         #chat-input {
-            flex-grow: 1; border: 1px solid #ccc; border-radius: 25px;
-            padding: 12px 20px; font-size: 1em; resize: none;
-            min-height: 48px; /* 버튼 높이와 맞추기 */
+            flex-grow: 1; 
+            border: 1px solid #ccc; 
+            border-radius: 24px; /* 보내기 버튼과 동일하게 맞춤 */
+            padding: 12px 20px; 
+            font-size: 1em; 
+            resize: none;
+            height: 48px; /* 보내기 버튼과 동일한 높이로 고정 */
+            min-height: 48px; /* 높이가 48px 미만으로 줄어들지 않도록 보장 */
             max-height: 150px; /* 최대 높이 설정 (조절 가능) */
             overflow-y: auto; /* 내용이 max-height를 넘으면 스크롤바 표시 */
+            line-height: 24px; /* 텍스트 한 줄이 48px 높이에 시각적으로 잘 맞도록 조절 (48 - (12+12) = 24) */
         }
         #chat-input:focus { 
             outline: none; 
@@ -116,16 +122,23 @@
             box-shadow: 0 0 0 3px rgba(253, 49, 46, 0.2);
         }
         .chat-btn {
-            flex-shrink: 0; height: 48px; border-radius: 50%;
-            border: none; cursor: pointer; display: flex; justify-content: center;
-            align-items: center; transition: background-color 0.3s;
+            flex-shrink: 0; 
+            height: 48px; /* 버튼의 고정 높이 */
+            border-radius: 50%;
+            border: none; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            transition: background-color 0.3s;
         }
         .chat-btn:disabled { background-color: #ccc; cursor: not-allowed; }
         #upload-btn { background-color: #f0f0f0; width: 48px; }
         
         #send-btn { 
-            background-color: var(--primary-color); color: white;
-            border-radius: 24px;
+            background-color: var(--primary-color); 
+            color: white;
+            border-radius: 24px; /* 높이가 48px이므로 24px이 원형 */
             padding: 0 20px;
             font-size: 1em;
             font-weight: bold;
@@ -166,18 +179,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatInput = document.getElementById('chat-input');
     const shortcutAnswerBtn = document.getElementById('shortcut-answer');
     const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
-    const shortcutAnalyzeBtn = document.getElementById('shortcut-analyze'); 
+    const shortcutAnalyzeBtn = document = document.getElementById('shortcut-analyze'); 
 
     let chatHistory = [];
     let selectedFile = null;
-    // index.html에서 저장한 시스템 지침과 채팅 모드 가져오기
     const currentSystemInstruction = sessionStorage.getItem('currentSystemInstruction');
     const chatMode = sessionStorage.getItem('chatMode');
 
     const initialProblem = sessionStorage.getItem('initialProblem');
     const storedHistory = sessionStorage.getItem('chatHistory');
 
-    // 시스템 지침이 없으면 오류로 간주하고 메인 페이지로 복귀
     if (!currentSystemInstruction || !initialProblem || !storedHistory) {
         alert('대화 정보를 불러올 수 없습니다. 메인 페이지로 돌아갑니다.');
         window.location.href = 'index.html';
@@ -185,7 +196,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     chatHistory = JSON.parse(storedHistory);
-    // 전체 대화 기록을 렌더링 (initialProblem 포함)
     renderChatHistory(chatHistory);
 
     exitBtn.addEventListener('click', () => window.location.href = 'index.html');
@@ -197,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             handleSend(); 
         }
     });
-    chatInput.addEventListener('input', autoResizeTextarea); // textarea 자동 높이 조절
+    chatInput.addEventListener('input', autoResizeTextarea);
     imageUploadInput.addEventListener('change', (e) => {
         selectedFile = e.target.files[0];
         if (selectedFile) {
@@ -208,19 +218,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     shortcutAnswerBtn.addEventListener('click', () => {
         chatInput.value = '정답을 알려주세요!';
-        autoResizeTextarea(); // 입력 후 높이 조절
+        autoResizeTextarea();
         handleSend();
     });
 
     shortcutMoreProblemBtn.addEventListener('click', () => {
         chatInput.value = '추가 문제를 내주세요.';
-        autoResizeTextarea(); // 입력 후 높이 조절
+        autoResizeTextarea();
         handleSend();
     });
 
     shortcutAnalyzeBtn.addEventListener('click', () => {
         chatInput.value = '틀린 이유를 분석해주세요.';
-        autoResizeTextarea(); // 입력 후 높이 조절
+        autoResizeTextarea();
         handleSend();
     });
 
@@ -228,16 +238,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userText = chatInput.value.trim();
         if (!userText && !selectedFile) return;
 
-        setInteractionState(true); // 입력 비활성화
+        setInteractionState(true);
         
-        // 사용자 메시지를 UI에 추가
         if (selectedFile) {
             appendMessage('user', userText, selectedFile);
         } else {
             appendMessage('user', userText);
         }
 
-        // Gemini API 요청을 위한 parts 구성
         const userParts = [{ "text": userText }];
         if (selectedFile) {
             try {
@@ -251,21 +259,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // chatHistory에 사용자 메시지 추가
         chatHistory.push({ "role": "user", "parts": userParts });
         
-        // 입력창 초기화 및 파일 선택 해제
         chatInput.value = '';
-        autoResizeTextarea(); // 초기화 후 높이 조절
+        autoResizeTextarea();
         selectedFile = null;
         imageUploadInput.value = '';
         uploadBtn.style.backgroundColor = '#f0f0f0';
         uploadBtn.querySelector('svg').style.fill = 'currentColor';
 
-        showLoadingIndicator(true); // 로딩 인디케이터 표시
+        showLoadingIndicator(true);
 
         try {
-            // chatHistory와 currentSystemInstruction을 함께 API로 전송
             const responseText = await callGeminiAPI(currentSystemInstruction, chatHistory);
             chatHistory.push({ "role": "model", "parts": [{ "text": responseText }] });
             appendMessage('model', responseText);
@@ -273,12 +278,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Gemini API Error:', error);
             appendMessage('model', `오류가 발생했습니다: ${error.message}`);
         } finally {
-            showLoadingIndicator(false); // 로딩 인디케이터 숨김
-            setInteractionState(false); // 입력 활성화
+            showLoadingIndicator(false);
+            setInteractionState(false);
         }
     }
 
-    // appendMessage 함수 수정: imageSource는 File 객체 또는 Base64 URL 문자열
     function appendMessage(role, text, imageSource = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role}`;
@@ -295,16 +299,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (imageSource) {
             const img = document.createElement('img');
             if (imageSource instanceof File) {
-                // File 객체인 경우 URL.createObjectURL 사용
                 img.src = URL.createObjectURL(imageSource);
             } else if (typeof imageSource === 'string' && imageSource.startsWith('data:image')) {
-                // Base64 데이터 URL 문자열인 경우 직접 사용
                 img.src = imageSource;
             } else {
                 console.warn('Invalid imageSource type:', imageSource);
-                // 유효하지 않은 소스일 경우 이미지 추가하지 않음
             }
-            // 이미지 로드 완료 후 스크롤
             img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
             bubble.appendChild(img);
         }
@@ -314,9 +314,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // 초기 로드 시 및 대화 기록이 변경될 때 전체 대화를 렌더링하는 함수
     function renderChatHistory(history) {
-        chatContainer.innerHTML = ''; // 기존 메시지 모두 지우기
+        chatContainer.innerHTML = '';
         history.forEach(message => {
             if (message.role === 'user') {
                 const textPart = message.parts.find(p => p.text)?.text || '';
@@ -366,7 +365,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // callGeminiAPI 함수 수정: systemInstruction 파라미터 추가
     async function callGeminiAPI(systemInstruction, history) {
         const apiKey = localStorage.getItem('geminiApiKey');
         if (!apiKey) throw new Error('API 키가 없습니다.');
@@ -374,7 +372,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const requestBody = { "contents": history };
         
-        // system_instruction이 존재하면 requestBody에 추가
         if (systemInstruction) {
             requestBody.system_instruction = { "parts": [{"text": systemInstruction}] };
         }
@@ -389,7 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             throw new Error(errorData.error.message || `HTTP error! status: ${response.status}`); 
         }
         const data = await response.json();
-        // 응답에 candidates와 content가 있는지 확인 후 반환
         if (data.candidates && data.candidates[0]?.content?.parts) {
             return data.candidates[0].content.parts[0].text;
         } else {
@@ -409,18 +405,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         shortcutAnalyzeBtn.disabled = disabled;
     }
 
-    // textarea 자동 높이 조절 함수
     function autoResizeTextarea() {
-        chatInput.style.height = 'auto'; // 높이 초기화
-        // scrollHeight는 요소의 실제 콘텐츠 높이를 반환합니다.
-        // min-height보다 작아지지 않도록 clamp 또는 Math.max 사용
+        chatInput.style.height = 'auto';
         chatInput.style.height = Math.max(chatInput.scrollHeight, chatInput.clientHeight) + 'px';
-        // max-height를 초과하는 경우 스크롤이 생기도록 CSS에서 overflow-y: auto; 설정
     }
-
-    // 페이지 로드 시 initialProblem이 자동으로 높이 조절되도록 호출
-    // (초기 로딩 시 chatHistory가 비어있지 않다면, chatInput.value가 없으므로 불필요할 수 있음)
-    // autoResizeTextarea(); 
 });
 </script>
 </body>

@@ -122,18 +122,34 @@
             background-color: var(--model-bg); /* 채팅 콘텐츠 영역 배경을 따뜻한 회색으로 변경 */
         }
 
-        .message { display: flex; margin-bottom: 20px; max-width: 85%; }
-        .message-bubble { padding: 12px 18px; border-radius: 20px; line-height: 1.6; color: var(--dark-color); }
-        .message-bubble img { max-width: 100%; border-radius: 10px; margin-top: 10px; }
-        .message-bubble pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 1em; }
-        
-        .user { align-self: flex-end; flex-direction: row-reverse; }
+        .message { 
+            display: flex; 
+            margin-bottom: 20px; 
+            max-width: 85%; 
+            /* 복사 버튼을 포함하여 메시지 전체가 정렬되도록 함 */
+            flex-direction: column; /* 기본적으로 세로 정렬 */
+            align-items: flex-start; /* 좌측 정렬 (모델과 동일) */
+        }
+        /* 사용자 메시지는 여전히 우측 정렬 */
+        .user { 
+            align-self: flex-end; 
+            align-items: flex-end; /* user 메시지의 내용은 우측 정렬 */
+        }
         .user .message-bubble { 
             background-color: var(--primary-color);
             color: var(--white-color);
             border-bottom-right-radius: 5px; 
         }
-        .model { align-self: flex-start; }
+
+        .message-bubble { 
+            padding: 12px 18px; 
+            border-radius: 20px; 
+            line-height: 1.6; 
+            color: var(--dark-color); 
+        }
+        .message-bubble img { max-width: 100%; border-radius: 10px; margin-top: 10px; }
+        .message-bubble pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 1em; }
+        
         .model .message-bubble { 
             background-color: var(--white-color); /* AI 말풍선 배경을 하얀색으로 변경 */
             border-bottom-left-radius: 5px; 
@@ -160,6 +176,45 @@
             width: 18px;
             height: 18px;
             flex-shrink: 0; /* 아이콘이 줄어들지 않도록 */
+        }
+
+        /* 복사 버튼 스타일 */
+        .copy-response-btn {
+            background-color: var(--light-gray); /* 은은한 배경색 */
+            color: var(--dark-gray-text);
+            border: none;
+            border-radius: 10px; 
+            padding: 6px 12px;
+            font-size: 0.85em; 
+            cursor: pointer;
+            margin-top: 5px; /* 말풍선과의 간격 */
+            align-self: flex-start; /* model 메시지와 동일하게 좌측 정렬 */
+            transition: opacity 0.2s ease-in-out, background-color 0.2s, color 0.2s; /* opacity도 transition에 포함 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* 부드러운 그림자 */
+            
+            /* 기본적으로 숨김 */
+            opacity: 0;
+            pointer-events: none; /* 숨겨져 있을 때 클릭 이벤트 방지 */
+        }
+        .copy-response-btn:hover {
+            background-color: var(--medium-gray);
+        }
+        .copy-response-btn:active {
+            background-color: #999;
+        }
+        .copy-response-btn:disabled {
+            background-color: #eee;
+            color: #aaa;
+            cursor: not-allowed;
+            pointer-events: none; /* disabled일 때도 클릭 이벤트 방지 */
+            opacity: 0.5; /* disabled일 때 약간 투명하게 */
+        }
+
+        /* 마우스 호버 또는 터치 시 복사 버튼 표시 */
+        .message.model:hover .copy-response-btn,
+        .message.model.active .copy-response-btn {
+            opacity: 1;
+            pointer-events: auto; /* 상호작용 가능 */
         }
 
 
@@ -378,7 +433,7 @@
                 <!-- 파일 아이콘 SVG (Material Design Icons - insert_drive_file) -->
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
             </button>
-            <textarea id="chat-input" placeholder="AI 선생님과 대화해보세요!"></textarea>
+            <textarea id="chat-input" placeholder="AILMS 선생님과 대화해보세요!"></textarea>
             <button id="send-btn" class="chat-btn" title="보내기">보내기</button>
         </div>
     </footer>
@@ -405,7 +460,7 @@
         const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
         const shortcutAnalyzeBtn = document.getElementById('shortcut-analyze'); 
         // New shortcut button
-        const shortcutExplainEasierBtn = document.getElementById('shortcut-explain-easier'); // New button element
+        const shortcutExplainEasierBtn = document.getElementById('shortcut-explain-easier');
 
         // Dynamic island elements
         const filePreviewBar = document.getElementById('file-preview-bar');
@@ -498,7 +553,7 @@
                 .replace('{{GRADE}}', grade);
             
             // Generate initial welcome message from AI
-            const initialModelResponse = `${userName} 학생, 안녕하세요! 저는 ${schoolLevel} ${grade} 학생들을 돕는 AI 선생님입니다. 무엇이든 궁금한 점이 있다면 편하게 질문해주세요!`;
+            const initialModelResponse = `${userName} 학생, 안녕하세요! 저는 AI 선생님입니다. 무엇이든 궁금한 점이 있다면 편하게 질문해주세요!`;
             
             // Initialize chat history with a placeholder user message and the AI's welcome
             chatHistory = [
@@ -695,7 +750,7 @@
 
                     if (fileMimeType && fileMimeType.startsWith('image/')) {
                         const img = document.createElement('img');
-                        // Use URL.createObjectURL for new File objects, or data URL for history
+                        // Use URL.createObjectURL for new File objects, or data URL for history (part.inline_data.data)
                         img.src = part.content instanceof File ? URL.createObjectURL(part.content) : `data:${part.mime_type};base64,${part.inline_data.data}`;
                         img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
                         bubble.appendChild(img);
@@ -710,10 +765,9 @@
                         bubble.appendChild(fileDisplayDiv);
                         hasFileContent = true;
                     }
-                } else if (part.inline_data && part.file_name) { // For history re-render of non-image files from API payload format
-                    // This is for rendering from chatHistory's structure directly, where file_name is available
+                } else if (part.inline_data && part.name) { // This case is for re-rendering from chatHistory's specific structure (with 'name' for non-image files)
                     const fileMimeType = part.inline_data.mime_type;
-                    const fileName = part.file_name;
+                    const fileName = part.name;
 
                     if (fileMimeType && fileMimeType.startsWith('image/')) {
                          const img = document.createElement('img');
@@ -737,6 +791,47 @@
             // Only append message div if there's any content to display
             if (hasTextContent || hasFileContent) {
                 messageDiv.appendChild(bubble);
+                
+                // Add copy button only for model messages
+                if (role === 'model') {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-response-btn';
+                    copyBtn.textContent = '복사';
+                    copyBtn.title = '응답 복사';
+                    copyBtn.addEventListener('click', () => {
+                        // Find the text content within the same message bubble
+                        const textToCopy = bubble.querySelector('pre')?.textContent || '';
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            copyBtn.textContent = '복사됨!';
+                            setTimeout(() => {
+                                copyBtn.textContent = '복사';
+                            }, 1500);
+                        }).catch(err => {
+                            console.error('Failed to copy text: ', err);
+                            alert('텍스트 복사에 실패했습니다.');
+                        });
+                    });
+                    messageDiv.appendChild(copyBtn);
+
+                    // Add hover/touch events to the messageDiv itself to show the copy button
+                    messageDiv.addEventListener('mouseover', () => {
+                        messageDiv.classList.add('active'); // Use 'active' class for styling
+                    });
+                    messageDiv.addEventListener('mouseout', () => {
+                        messageDiv.classList.remove('active');
+                    });
+                    // For touch devices, touchstart can activate, touchend removes after a delay
+                    messageDiv.addEventListener('touchstart', () => {
+                        messageDiv.classList.add('active');
+                    });
+                    messageDiv.addEventListener('touchend', () => {
+                        // Keep active for a short while so button can be pressed
+                        setTimeout(() => {
+                            messageDiv.classList.remove('active');
+                        }, 500); 
+                    });
+                }
+
                 chatContainer.appendChild(messageDiv);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -752,7 +847,11 @@
                         partsForDisplay.push({ type: "text", content: part.text });
                     }
                     if (part.inline_data) {
-                        // Pass inline_data, name (from file_name in history), and mime_type for re-rendering file content
+                        // For re-rendering from history, ensure 'name' is passed if file_name was stored
+                        // Note: In handleSend, we decided NOT to send file_name to API for compatibility.
+                        // So, we need to ensure that when we store in chatHistory, we *do* save file_name if we want to re-render it.
+                        // The current `userPartsForAPI` does NOT save `file_name`.
+                        // Let's modify `userPartsForAPI` in `handleSend` to include `file_name` for consistency in `chatHistory`.
                         partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.file_name, mime_type: part.inline_data.mime_type });
                     }
                 });
@@ -857,7 +956,12 @@
             shortcutAnswerBtn.disabled = disabled;
             shortcutMoreProblemBtn.disabled = disabled;
             shortcutAnalyzeBtn.disabled = disabled;
-            shortcutExplainEasierBtn.disabled = disabled; // New button disabled state
+            shortcutExplainEasierBtn.disabled = disabled; 
+            
+            // Disable all copy buttons while API call is in progress
+            document.querySelectorAll('.copy-response-btn').forEach(btn => {
+                btn.disabled = disabled;
+            });
         }
 
         // Functions for file preview bar

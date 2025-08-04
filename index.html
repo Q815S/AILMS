@@ -28,9 +28,12 @@
         /* 전체 HTML, body 배경색 설정 (따뜻한 회색) */
         html, body { 
             width: 100%; 
-            /* height: 100% 제거 */
+            height: 100%; /* vh 문제 해결을 위해 다시 100%로 설정. min-height와 함께 사용 */
+            min-height: var(--app-height); /* JS로 계산된 높이로 최소 높이 설정 */
             font-family: 'Malgun Gothic', sans-serif; 
             background-color: var(--light-color); /* 전체 페이지 배경을 따뜻한 회색으로 */
+            overflow-y: scroll; /* 세로 스크롤 허용 (주소창 숨김 위함) */
+            overflow-x: hidden; /* 가로 스크롤 숨김 */
         }
         
         .hidden { display: none !important; }
@@ -38,12 +41,14 @@
         /* 초기 설정 화면 컨테이너 */
         .initial-container { 
             display: flex; justify-content: center; align-items: center; 
-            width: 100%; min-height: 100vh; padding: 20px;
-            background-color: var(--light-color); /* 명시적으로 따뜻한 회색 배경 지정 */
+            width: 100%; 
+            min-height: 100vh; /* 초기 화면은 100vh 유지 (브라우저 주소창 포함) */
+            padding: 20px;
+            background-color: var(--light-color); 
         }
         .card { 
             width: 100%; max-width: 600px; 
-            background: var(--white-color); /* 카드 배경은 하얀색 */
+            background: var(--white-color); 
             padding: 30px; border-radius: 20px; 
             box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }
@@ -105,7 +110,8 @@
         #chat-screen { 
             display: flex; 
             flex-direction: column; 
-            height: var(--app-height); /* 동적으로 계산된 뷰포트 높이 사용 */
+            height: 100%; /* 부모(body)의 100% 높이를 따름 */
+            /* position: absolute; top: 0; left: 0; right: 0; bottom: 0; 제거 */
         }
         header {
             flex-shrink: 0; background: var(--white-color); padding: 15px 20px;
@@ -405,9 +411,10 @@
             <button id="shortcut-explain-easier" class="shortcut-btn">더 쉽게 설명해주세요!</button>
         </div>
         <div class="chat-input-area">
+            <!-- accept="image/*"로 유지 -->
             <input type="file" id="file-upload-input" class="hidden" accept="image/*">
-            <button id="upload-btn" class="chat-btn" title="사진 업로드">
-                <!-- 파일 아이콘 SVG (Material Design Icons - insert_drive_file) -->
+            <button id="upload-btn" class="chat-btn" title="파일 업로드">
+                <!-- 파일 아이콘 SVG (Material Design Icons - insert_drive_file)로 변경 -->
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
             </button>
             <textarea id="chat-input" placeholder="AI 선생님과 대화해보세요!"></textarea>
@@ -456,8 +463,9 @@
         // --------------------------------------------------
 
         // --- Dynamic app height for mobile viewport consistency ---
+        // body의 min-height를 설정하여 모바일 주소창 문제를 완화합니다.
         function setAppHeight() {
-            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+            document.body.style.minHeight = `${window.innerHeight}px`;
         }
 
         setAppHeight();
@@ -696,7 +704,7 @@
                 chatHistory.push({ "role": "model", "parts": [{ "text": responseText }] });
                 appendMessage('model', [{ "type": "text", "content": responseText }]); 
             } catch (error) {
-                console.error('Gemini API Error:', error);
+                console.error('Gemini API Error:', error); 
                 appendMessage('model', [{ "type": "text", "content": `오류가 발생했습니다: ${error.message}` }]);
             } finally {
                 showLoadingIndicator(false);
@@ -704,6 +712,7 @@
             }
         }
 
+        // Modified appendMessage to handle multiple parts (text, image, file info) for UI rendering
         function appendMessage(role, parts) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
@@ -719,10 +728,10 @@
                     pre.textContent = part.content;
                     bubble.appendChild(pre);
                     hasContent = true;
-                } else if (part.type === "file") { // For file content (now assumed to be image only based on accept)
+                } else if (part.type === "file") { // Only for 'file' type parts (i.e., image and its name)
                     const fileMimeType = part.mime_type;
-                    const fileName = part.name;
-
+                    const fileName = part.name; // Use 'name' from partsForDisplay
+                    
                     if (fileMimeType && fileMimeType.startsWith('image/')) {
                         const img = document.createElement('img');
                         img.src = part.content instanceof File ? URL.createObjectURL(part.content) : `data:${part.mime_type};base64,${part.inline_data.data}`;
@@ -730,13 +739,7 @@
                         bubble.appendChild(img);
                         hasContent = true;
                     } 
-                    // No other file types are handled for display within bubble
-                } else if (part.inline_data && part.inline_data.mime_type.startsWith('image/')) { // From history re-render
-                    const img = document.createElement('img');
-                    img.src = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
-                    img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
-                    bubble.appendChild(img);
-                    hasContent = true;
+                    // No other file types are handled for display within the bubble
                 }
             });
 
@@ -759,7 +762,10 @@
                         }).catch(err => {
                             console.error('Failed to copy text: ', err);
                             alert('텍스트 복사에 실패했습니다. HTTPS 환경 또는 로컬호스트에서 실행 중인지 확인해주세요.'); 
-                            setTimeout(() => messageDiv.classList.remove('active'), 500); // Hide button on failure
+                            setTimeout(() => { // Ensure button state resets even on error
+                                copyBtn.textContent = '복사';
+                                messageDiv.classList.remove('active');
+                            }, 1500);
                         });
                     });
                     messageDiv.appendChild(copyBtn);
@@ -787,6 +793,7 @@
             }
         }
 
+        // renderChatHistory now specifically handles text and images
         function renderChatHistory(history) {
             chatContainer.innerHTML = ''; 
             history.forEach(message => {
@@ -796,7 +803,7 @@
                         partsForDisplay.push({ type: "text", content: part.text });
                     }
                     if (part.inline_data && part.inline_data.mime_type.startsWith('image/')) {
-                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: "image.png", mime_type: part.inline_data.mime_type }); // Assuming image for simplicity
+                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.name, mime_type: part.inline_data.mime_type });
                     }
                 });
                 
@@ -847,6 +854,7 @@
             if (!apiKey) throw new Error('API 키가 없습니다.');
             const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             
+            // Prepare contents for API call - only text and inline_data
             const contentsForAPI = history.map(entry => {
                 const apiParts = entry.parts.map(part => {
                     if (part.text) {
@@ -904,17 +912,20 @@
                 btn.disabled = disabled;
             });
 
+            // Ensure copy buttons are hidden when interaction state becomes active again
             if (!disabled) {
                 removeActiveFromMessages();
             }
         }
 
+        // Function to ensure all copy buttons are hidden
         function removeActiveFromMessages() {
             document.querySelectorAll('.message.model.active').forEach(msgDiv => {
                 msgDiv.classList.remove('active');
             });
         }
 
+        // Functions for file preview bar
         function showFilePreview(fileName) {
             fileNameDisplay.textContent = fileName;
             filePreviewBar.classList.add('visible');

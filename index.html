@@ -155,29 +155,6 @@
             border-bottom-left-radius: 5px; 
         }
 
-        /* 말풍선 안 파일명 표시 스타일 */
-        .message-bubble .file-display-in-bubble {
-            margin-top: 10px; /* 텍스트와의 간격 */
-            padding: 8px 12px;
-            background-color: var(--preview-bg); /* 다이내믹 아일랜드와 유사한 배경색 */
-            border-radius: 15px;
-            font-size: 0.9em;
-            color: var(--dark-gray-text);
-            display: flex;
-            align-items: center;
-            gap: 8px; /* 아이콘과 텍스트 간격 */
-            max-width: fit-content; /* 내용에 맞춰 너비 조절 */
-            overflow: hidden; /* 넘치는 내용 숨기기 */
-            text-overflow: ellipsis; /* ...으로 표시 */
-            white-space: nowrap; /* 파일명 한 줄로 */
-        }
-        .message-bubble .file-display-in-bubble svg {
-            fill: var(--dark-gray-text);
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0; /* 아이콘이 줄어들지 않도록 */
-        }
-
         /* 복사 버튼 스타일 */
         .copy-response-btn {
             background-color: var(--light-gray); /* 은은한 배경색 */
@@ -428,8 +405,8 @@
             <button id="shortcut-explain-easier" class="shortcut-btn">더 쉽게 설명해주세요!</button>
         </div>
         <div class="chat-input-area">
-            <input type="file" id="file-upload-input" class="hidden" accept="image/*, application/pdf">
-            <button id="upload-btn" class="chat-btn" title="파일 업로드">
+            <input type="file" id="file-upload-input" class="hidden" accept="image/*">
+            <button id="upload-btn" class="chat-btn" title="사진 업로드">
                 <!-- 파일 아이콘 SVG (Material Design Icons - insert_drive_file) -->
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
             </button>
@@ -454,7 +431,7 @@
         const exitBtn = document.getElementById('exit-class-btn');
         const sendBtn = document.getElementById('send-btn');
         const uploadBtn = document.getElementById('upload-btn');
-        const fileUploadInput = document.getElementById('file-upload-input');
+        const fileUploadInput = document.getElementById('file-upload-input'); 
         const chatInput = document.getElementById('chat-input');
         const shortcutAnswerBtn = document.getElementById('shortcut-answer');
         const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
@@ -480,11 +457,9 @@
 
         // --- Dynamic app height for mobile viewport consistency ---
         function setAppHeight() {
-            // Get the actual inner height of the window (excludes browser UI on mobile)
             document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         }
 
-        // Call initially and on window resize (e.g., orientation change, address bar hide/show)
         setAppHeight();
         window.addEventListener('resize', setAppHeight);
         // ---------------------------------------------------------
@@ -512,7 +487,7 @@
         // --- Initial Load Logic: Always show initial setup screen first ---
         initialSetupScreen.classList.remove('hidden');
         chatScreen.classList.add('hidden');
-        helpFab.classList.remove('hidden'); // Show help FAB on initial screen
+        helpFab.classList.remove('hidden');
 
 
         // --- Event Listeners for Initial Setup Screen ---
@@ -528,7 +503,6 @@
             const grade = gradeSelect.value;
 
             if (apiKey && userName && schoolLevel && grade) {
-                // Save to localStorage for future visits
                 localStorage.setItem('geminiApiKey', apiKey);
                 localStorage.setItem('userName', userName);
                 localStorage.setItem('schoolLevel', schoolLevel);
@@ -553,47 +527,38 @@
 
         // Function to transition to chat screen and start session
         function startChatSession(userName, schoolLevel, grade) {
-            // Hide initial setup, show chat screen
             initialSetupScreen.classList.add('hidden');
             chatScreen.classList.remove('hidden');
-            helpFab.classList.add('hidden'); // Hide help FAB when chat starts
+            helpFab.classList.add('hidden');
 
-            // Personalize system instruction
             currentSystemInstruction = SYSTEM_INSTRUCTION_TEMPLATE
                 .replace('{{STUDENT_NAME}}', userName)
                 .replace('{{SCHOOL_LEVEL}}', schoolLevel)
                 .replace('{{GRADE}}', grade);
             
-            // Generate initial welcome message from AI
             const initialModelResponse = `${userName} 학생, 안녕하세요! 저는 AI 선생님입니다. 무엇이든 궁금한 점이 있다면 편하게 질문해주세요!`;
             
-            // Initialize chat history with a placeholder user message and the AI's welcome
             chatHistory = [
                 { role: 'user', parts: [{ text: `AI 선생님, 안녕하세요! 저는 ${userName}입니다.` }] },
                 { role: 'model', parts: [{ text: initialModelResponse }] }
             ];
 
-            // Render the initial chat history
             renderChatHistory(chatHistory);
         }
 
         // --- Event Listeners for Chat Screen ---
         exitBtn.addEventListener('click', () => {
             if (confirm('대화를 종료하고 처음 설정 화면으로 돌아가시겠습니까?')) {
-                // Clear session history for a clean chat restart
                 sessionStorage.clear(); 
                 
-                // Clear local variables
                 chatHistory = []; 
                 selectedFile = null; 
                 currentSystemInstruction = "";
 
-                // Hide chat screen, show initial setup screen
                 chatScreen.classList.add('hidden');
                 initialSetupScreen.classList.remove('hidden');
-                helpFab.classList.remove('hidden'); // Show help FAB when returning to initial screen
+                helpFab.classList.remove('hidden');
 
-                // Re-populate initial setup form fields from localStorage (if values exist)
                 apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
                 userNameInput.value = localStorage.getItem('userName') || '';
                 const savedSchool = localStorage.getItem('schoolLevel') || '초등학교';
@@ -601,14 +566,13 @@
                 updateGradeOptions(savedSchool); 
                 gradeSelect.value = localStorage.getItem('grade') || '1학년'; 
 
-                // Reset file preview bar if it was visible
-                hideFilePreview();
+                hideFilePreview(); // Hide preview bar on exit
             }
         });
         
         // Help FAB click event
         helpFab.addEventListener('click', () => {
-            window.open('https://www.lge.com/', '_blank'); // Open lge.com in a new tab
+            window.open('https://www.lge.com/', '_blank');
         });
 
         uploadBtn.addEventListener('click', () => fileUploadInput.click()); 
@@ -620,27 +584,37 @@
             }
         });
 
-        // File input change event
+        // File input change event - Simplified for image only, re-added preview bar
         fileUploadInput.addEventListener('change', (e) => {
             selectedFile = e.target.files[0];
             if (selectedFile) {
+                // Check if it's an image file
+                if (!selectedFile.type.startsWith('image/')) {
+                    alert('사진 파일만 업로드할 수 있습니다.');
+                    selectedFile = null;
+                    fileUploadInput.value = ''; // Clear the input
+                    uploadBtn.style.backgroundColor = 'var(--model-bg)';
+                    uploadBtn.querySelector('svg').style.fill = 'var(--dark-gray-text)';
+                    hideFilePreview(); // Ensure preview is hidden if non-image selected
+                    return;
+                }
                 uploadBtn.style.backgroundColor = 'var(--primary-color)';
                 uploadBtn.querySelector('svg').style.fill = 'white';
-                showFilePreview(selectedFile.name);
+                showFilePreview(selectedFile.name); // Show preview bar
             } else { // File selection cancelled
                 uploadBtn.style.backgroundColor = 'var(--model-bg)';
                 uploadBtn.querySelector('svg').style.fill = 'var(--dark-gray-text)'; 
-                hideFilePreview();
+                hideFilePreview(); // Hide preview bar
             }
         });
 
-        // Clear file button event
+        // Clear file button event - restored
         clearFileBtn.addEventListener('click', () => {
             selectedFile = null;
             fileUploadInput.value = ''; // Clear the input so same file can be selected again
             uploadBtn.style.backgroundColor = 'var(--model-bg)';
             uploadBtn.querySelector('svg').style.fill = 'var(--dark-gray-text)';
-            hideFilePreview();
+            hideFilePreview(); // Hide preview bar
         });
 
 
@@ -659,7 +633,6 @@
             handleSend();
         });
 
-        // New shortcut button event listener
         shortcutExplainEasierBtn.addEventListener('click', () => {
             chatInput.value = '더 쉽게 설명해주세요!';
             handleSend();
@@ -671,9 +644,8 @@
 
             setInteractionState(true);
             
-            // Prepare user's message parts for display and API
-            const userPartsForDisplay = []; // For appendMessage
-            const userPartsForAPI = []; // For chatHistory.push (stripped for API compatibility)
+            const userPartsForDisplay = []; 
+            const userPartsForAPI = []; 
 
             if (userText) { 
                 userPartsForDisplay.push({ "type": "text", "content": userText });
@@ -685,7 +657,6 @@
                     const base64Data = await fileToBase64(selectedFile);
                     userPartsForDisplay.push({ "type": "file", "content": selectedFile, "name": selectedFile.name, "mime_type": selectedFile.type });
                     
-                    // API로 보낼 payload에서는 file_name을 제거합니다.
                     userPartsForAPI.push({ "inline_data": { "mime_type": selectedFile.type, "data": base64Data } }); 
                 } catch (error) {
                     console.error("File to Base64 Error:", error);
@@ -695,13 +666,9 @@
                 }
             }
 
-            // Append to UI immediately
             appendMessage('user', userPartsForDisplay);
-
-            // Add to chat history for API context (using userPartsForAPI)
             chatHistory.push({ "role": "user", "parts": userPartsForAPI });
             
-            // Clear input and file selection UI
             chatInput.value = '';
             selectedFile = null;
             fileUploadInput.value = ''; 
@@ -713,23 +680,21 @@
             showLoadingIndicator(true);
 
             try {
-                // chatHistory를 필터링하여 API에 맞는 형태로 전달합니다.
                 const historyForApiCall = chatHistory.map(entry => {
                     const apiParts = entry.parts.map(part => {
                         if (part.text) {
                             return { text: part.text };
                         } else if (part.inline_data) {
-                            // file_name은 UI용이므로 API 호출 시 제거
                             return { inline_data: part.inline_data };
                         }
-                        return null; // Should not happen if structure is clean
+                        return null; 
                     }).filter(part => part !== null);
                     return { role: entry.role, parts: apiParts };
                 });
 
                 const responseText = await callGeminiAPI(currentSystemInstruction, historyForApiCall);
                 chatHistory.push({ "role": "model", "parts": [{ "text": responseText }] });
-                appendMessage('model', [{ "type": "text", "content": responseText }]); // Append model response to UI
+                appendMessage('model', [{ "type": "text", "content": responseText }]); 
             } catch (error) {
                 console.error('Gemini API Error:', error);
                 appendMessage('model', [{ "type": "text", "content": `오류가 발생했습니다: ${error.message}` }]);
@@ -739,7 +704,6 @@
             }
         }
 
-        // Modified appendMessage to handle multiple parts (text, image, file info) for UI rendering
         function appendMessage(role, parts) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
@@ -747,72 +711,45 @@
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             
-            let hasTextContent = false;
-            let hasFileContent = false;
+            let hasContent = false;
 
             parts.forEach(part => {
-                if (part.type === "text" && part.content) { // For text content
+                if (part.type === "text" && part.content) { // Text content
                     const pre = document.createElement('pre');
                     pre.textContent = part.content;
                     bubble.appendChild(pre);
-                    hasTextContent = true;
-                } else if (part.type === "file") { // For file content (image or non-image)
+                    hasContent = true;
+                } else if (part.type === "file") { // For file content (now assumed to be image only based on accept)
                     const fileMimeType = part.mime_type;
                     const fileName = part.name;
 
                     if (fileMimeType && fileMimeType.startsWith('image/')) {
                         const img = document.createElement('img');
-                        // Use URL.createObjectURL for new File objects, or data URL for history (part.inline_data.data)
                         img.src = part.content instanceof File ? URL.createObjectURL(part.content) : `data:${part.mime_type};base64,${part.inline_data.data}`;
                         img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
                         bubble.appendChild(img);
-                        hasFileContent = true;
-                    } else if (fileName) { // Non-image file, display as text + icon
-                        const fileDisplayDiv = document.createElement('div');
-                        fileDisplayDiv.className = 'file-display-in-bubble';
-                        fileDisplayDiv.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
-                            <span>${fileName}</span>
-                        `;
-                        bubble.appendChild(fileDisplayDiv);
-                        hasFileContent = true;
-                    }
-                } else if (part.inline_data && part.name) { // This case is for re-rendering from chatHistory's specific structure (with 'name' for non-image files)
-                    const fileMimeType = part.inline_data.mime_type;
-                    const fileName = part.name;
-
-                    if (fileMimeType && fileMimeType.startsWith('image/')) {
-                         const img = document.createElement('img');
-                         img.src = `data:${fileMimeType};base64,${part.inline_data.data}`;
-                         img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
-                         bubble.appendChild(img);
-                         hasFileContent = true;
-                    } else if (fileName) {
-                        const fileDisplayDiv = document.createElement('div');
-                        fileDisplayDiv.className = 'file-display-in-bubble';
-                        fileDisplayDiv.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
-                            <span>${fileName}</span>
-                        `;
-                        bubble.appendChild(fileDisplayDiv);
-                        hasFileContent = true;
-                    }
+                        hasContent = true;
+                    } 
+                    // No other file types are handled for display within bubble
+                } else if (part.inline_data && part.inline_data.mime_type.startsWith('image/')) { // From history re-render
+                    const img = document.createElement('img');
+                    img.src = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
+                    img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
+                    bubble.appendChild(img);
+                    hasContent = true;
                 }
             });
 
-            // Only append message div if there's any content to display
-            if (hasTextContent || hasFileContent) {
+            if (hasContent) {
                 messageDiv.appendChild(bubble);
                 
-                // Add copy button only for model messages
                 if (role === 'model') {
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'copy-response-btn';
                     copyBtn.textContent = '복사';
                     copyBtn.title = '응답 복사';
                     copyBtn.addEventListener('click', (event) => {
-                        event.stopPropagation(); // Prevent messageDiv's touchend from immediately hiding the button
-                        // Find the text content within the same message bubble
+                        event.stopPropagation(); 
                         const textToCopy = bubble.querySelector('pre')?.textContent || '';
                         navigator.clipboard.writeText(textToCopy).then(() => {
                             copyBtn.textContent = '복사됨!';
@@ -821,33 +758,26 @@
                             }, 1500);
                         }).catch(err => {
                             console.error('Failed to copy text: ', err);
-                            alert('텍스트 복사에 실패했습니다.');
+                            alert('텍스트 복사에 실패했습니다. HTTPS 환경 또는 로컬호스트에서 실행 중인지 확인해주세요.'); 
+                            setTimeout(() => messageDiv.classList.remove('active'), 500); // Hide button on failure
                         });
                     });
                     messageDiv.appendChild(copyBtn);
 
-                    // Add hover/touch events to the messageDiv itself to show the copy button
                     messageDiv.addEventListener('mouseover', () => {
-                        messageDiv.classList.add('active'); // Use 'active' class for styling
+                        messageDiv.classList.add('active'); 
                     });
                     messageDiv.addEventListener('mouseout', () => {
-                        // Only remove 'active' if not currently disabled
-                        if (!messageDiv.querySelector('.copy-response-btn').disabled) {
-                           messageDiv.classList.remove('active');
-                        }
+                        messageDiv.classList.remove('active');
                     });
-                    // For touch devices, touchstart can activate, touchend removes after a delay
                     messageDiv.addEventListener('touchstart', () => {
                         messageDiv.classList.add('active');
                     });
                     messageDiv.addEventListener('touchend', (event) => {
-                        // Keep active for a short while so button can be pressed.
-                        // Only remove 'active' if not currently disabled.
-                        // And check if the touch ended on the button itself.
-                        if (!messageDiv.querySelector('.copy-response-btn').disabled && !copyBtn.contains(event.target)) {
-                            setTimeout(() => {
-                                messageDiv.classList.remove('active');
-                            }, 500); 
+                        if (!copyBtn.contains(event.target)) { 
+                           setTimeout(() => {
+                               messageDiv.classList.remove('active');
+                           }, 500); 
                         }
                     });
                 }
@@ -857,22 +787,20 @@
             }
         }
 
-        // renderChatHistory now uses the unified appendMessage with adjusted part structure
         function renderChatHistory(history) {
-            chatContainer.innerHTML = ''; // Clear existing messages
+            chatContainer.innerHTML = ''; 
             history.forEach(message => {
                 const partsForDisplay = [];
                 message.parts.forEach(part => {
                     if (part.text) {
                         partsForDisplay.push({ type: "text", content: part.text });
                     }
-                    if (part.inline_data) {
-                        // For re-rendering from history, ensure 'name' is passed if file_name was stored
-                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.file_name, mime_type: part.inline_data.mime_type });
+                    if (part.inline_data && part.inline_data.mime_type.startsWith('image/')) {
+                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: "image.png", mime_type: part.inline_data.mime_type }); // Assuming image for simplicity
                     }
                 });
                 
-                if (partsForDisplay.length > 0) { // Only render if there's actual content to show
+                if (partsForDisplay.length > 0) { 
                     appendMessage(message.role, partsForDisplay);
                 }
             });
@@ -917,18 +845,16 @@
         async function callGeminiAPI(systemInstruction, history) {
             const apiKey = localStorage.getItem('geminiApiKey');
             if (!apiKey) throw new Error('API 키가 없습니다.');
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             
-            // history (contents)를 Gemini API가 요구하는 형식으로 변환
             const contentsForAPI = history.map(entry => {
                 const apiParts = entry.parts.map(part => {
                     if (part.text) {
                         return { text: part.text };
                     } else if (part.inline_data) {
-                        // inline_data만 포함하고 file_name은 제외 (API 호환성)
                         return { inline_data: part.inline_data };
                     }
-                    return null; // 유효하지 않은 파트 필터링
+                    return null; 
                 }).filter(part => part !== null);
 
                 return {
@@ -974,13 +900,21 @@
             shortcutAnalyzeBtn.disabled = disabled;
             shortcutExplainEasierBtn.disabled = disabled; 
             
-            // Disable all copy buttons while API call is in progress
             document.querySelectorAll('.copy-response-btn').forEach(btn => {
                 btn.disabled = disabled;
             });
+
+            if (!disabled) {
+                removeActiveFromMessages();
+            }
         }
 
-        // Functions for file preview bar
+        function removeActiveFromMessages() {
+            document.querySelectorAll('.message.model.active').forEach(msgDiv => {
+                msgDiv.classList.remove('active');
+            });
+        }
+
         function showFilePreview(fileName) {
             fileNameDisplay.textContent = fileName;
             filePreviewBar.classList.add('visible');

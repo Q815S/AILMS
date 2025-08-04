@@ -19,16 +19,19 @@
             --dark-gray-text: #555; /* 진한 회색 텍스트 (label, 아이콘 색상) */
             --soft-gray-bg: #fafafa; /* 부드러운 회색 배경 (input) */
             --preview-bg: #e6e6e6; /* 파일 프리뷰 바 배경색 */
+
+            /* 동적인 높이 조절을 위한 변수 */
+            --app-height: 100vh; /* 폴백값. JS에서 실제 뷰포트 높이로 업데이트됨 */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         /* 전체 HTML, body 배경색 설정 (따뜻한 회색) */
         html, body { 
             width: 100%; 
-            height: 100%; 
+            height: 100%; /* vh 문제 해결을 위해 이 100%는 유지 */
             font-family: 'Malgun Gothic', sans-serif; 
             background-color: var(--light-color); /* 전체 페이지 배경을 따뜻한 회색으로 */
-            /* 이전: overflow: hidden; */ /* 이 줄을 제거하여 모바일 주소창 자동 숨김을 가능하게 함 */
+            /* overflow: hidden; 제거 */ 
         }
         
         .hidden { display: none !important; }
@@ -36,7 +39,8 @@
         /* 초기 설정 화면 컨테이너 */
         .initial-container { 
             display: flex; justify-content: center; align-items: center; 
-            width: 100%; min-height: 100vh; padding: 20px;
+            width: 100%; min-height: 100vh; /* 초기 화면은 100vh 유지 (브라우저 주소창 포함) */
+            padding: 20px;
             background-color: var(--light-color); /* 명시적으로 따뜻한 회색 배경 지정 */
         }
         .card { 
@@ -103,7 +107,7 @@
         #chat-screen { 
             display: flex; 
             flex-direction: column; 
-            height: 100%; 
+            height: var(--app-height); /* 동적으로 계산된 뷰포트 높이 사용 */
         }
         header {
             flex-shrink: 0; background: var(--white-color); padding: 15px 20px;
@@ -475,6 +479,18 @@
         // --- System Instructions integrated into code ---
         const SYSTEM_INSTRUCTION_TEMPLATE = `당신은 {{STUDENT_NAME}} 학생의 친절하고 박식한 AI 선생님입니다. 학생은 현재 {{SCHOOL_LEVEL}} {{GRADE}} 학생입니다. 학생이 학습에 대한 질문 뿐만 아니라 궁금한 점이나 일상적인 대화도 편하게 나눌 수 있도록 도와주세요. 항상 긍정적이고 도움이 되는 방식으로 소통해주세요. 문제에 대한 질문이 들어오면 해당 문제에 대한 해설과 풀이를 제공해주고, 추가 문제 요청이 있으면 새로운 문제를 생성하여 제공해주세요.`;
         // --------------------------------------------------
+
+        // --- Dynamic app height for mobile viewport consistency ---
+        function setAppHeight() {
+            // Get the actual inner height of the window (excludes browser UI on mobile)
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+        }
+
+        // Call initially and on window resize (e.g., orientation change, address bar hide/show)
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        // ---------------------------------------------------------
+
 
         // Load saved data from localStorage
         const savedApiKey = localStorage.getItem('geminiApiKey');
@@ -854,8 +870,6 @@
                     }
                     if (part.inline_data) {
                         // For re-rendering from history, ensure 'name' is passed if file_name was stored
-                        // We store `file_name` in chatHistory, but strip it for API.
-                        // So, when rendering from chatHistory, `part.file_name` is available.
                         partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.file_name, mime_type: part.inline_data.mime_type });
                     }
                 });

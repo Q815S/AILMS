@@ -22,6 +22,7 @@
 
             /* 동적인 높이 조절을 위한 변수 */
             --app-height: 100vh; /* 폴백값. JS에서 실제 뷰포트 높이로 업데이트됨 */
+            --keyboard-offset-bottom: 0px; /* 키보드 높이만큼의 패딩 */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -34,6 +35,7 @@
             background-color: var(--light-color); /* 전체 페이지 배경을 따뜻한 회색으로 */
             overflow-y: scroll; /* 세로 스크롤 허용 (주소창 숨김 위함) */
             overflow-x: hidden; /* 가로 스크롤 숨김 */
+            padding-bottom: var(--keyboard-offset-bottom, 0px); /* 키보드가 올라올 때 하단 패딩 적용 */
         }
         
         .hidden { display: none !important; }
@@ -110,8 +112,12 @@
         #chat-screen { 
             display: flex; 
             flex-direction: column; 
-            height: 100%; /* 부모(body)의 100% 높이를 따름 */
-            /* position: absolute; top: 0; left: 0; right: 0; bottom: 0; 제거 */
+            height: 100%; /* body 높이를 따름 */
+            position: fixed; /* 화면에 고정 */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
         header {
             flex-shrink: 0; background: var(--white-color); padding: 15px 20px;
@@ -466,6 +472,8 @@
         // body의 min-height를 설정하여 모바일 주소창 문제를 완화합니다.
         function setAppHeight() {
             document.body.style.minHeight = `${window.innerHeight}px`;
+            // 추가적으로, 채팅 화면이 활성화되었을 때만 이 높이를 적용할 수도 있습니다.
+            // 하지만 body에 min-height를 설정하면 전역적으로 잘 작동하는 경우가 많습니다.
         }
 
         setAppHeight();
@@ -495,7 +503,7 @@
         // --- Initial Load Logic: Always show initial setup screen first ---
         initialSetupScreen.classList.remove('hidden');
         chatScreen.classList.add('hidden');
-        helpFab.classList.remove('hidden');
+        helpFab.classList.remove('hidden'); // Show help FAB on initial screen
 
 
         // --- Event Listeners for Initial Setup Screen ---
@@ -739,7 +747,6 @@
                         bubble.appendChild(img);
                         hasContent = true;
                     } 
-                    // No other file types are handled for display within the bubble
                 }
             });
 
@@ -762,7 +769,7 @@
                         }).catch(err => {
                             console.error('Failed to copy text: ', err);
                             alert('텍스트 복사에 실패했습니다. HTTPS 환경 또는 로컬호스트에서 실행 중인지 확인해주세요.'); 
-                            setTimeout(() => { // Ensure button state resets even on error
+                            setTimeout(() => { 
                                 copyBtn.textContent = '복사';
                                 messageDiv.classList.remove('active');
                             }, 1500);
@@ -802,8 +809,11 @@
                     if (part.text) {
                         partsForDisplay.push({ type: "text", content: part.text });
                     }
+                    // For re-rendering, `part.name` might be undefined if not explicitly stored in chatHistory
+                    // The `userPartsForAPI` in handleSend doesn't save `name`.
+                    // So, for consistent re-rendering, we'll try to get `name` from `part.name` if present, or create a placeholder.
                     if (part.inline_data && part.inline_data.mime_type.startsWith('image/')) {
-                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.name, mime_type: part.inline_data.mime_type });
+                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.name || "Uploaded Image", mime_type: part.inline_data.mime_type });
                     }
                 });
                 

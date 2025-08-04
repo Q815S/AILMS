@@ -4,39 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AILMS Platform 1.0 By Q815S</title>
-    <script src="system_instruction.js"></script>
     <style>
-        :root { --primary-color: #FD312E; --dark-color: #000000; --light-color: #F0ECE4; --white-color: #FFFFFF; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; font-family: 'Malgun Gothic', sans-serif; }
-        
-        body {
-            background-color: var(--light-color); /* Warm Gray */
+        :root { 
+            --primary-color: #FD312E; /* 액티브 레드 */ 
+            --danger-color: #A50034; /* 헤리티지 레드 */ 
+            --model-bg: #F0ECE4; /* 따뜻한 회색 - 채팅 영역 배경 및 파일 업로드 버튼 기본 배경 */ 
+            --light-color: #F0ECE4; /* 따뜻한 회색 - 전체 페이지 배경 및 초기 화면 카드 그림자 등 */
+            --white-color: #FFFFFF; /* 하얀색 - 카드 배경, AI 말풍선 배경 등 */ 
+            --dark-color: #000000; /* 검은색 - 텍스트, 제목 등 */ 
+
+            /* 추가적으로 사용될 수 있는 회색 톤 */
+            --light-gray: #e0e0e0; /* 연한 회색 (border, shortcut-btn background) */
+            --medium-gray: #ccc; /* 중간 회색 (shortcut-btn hover) */
+            --dark-gray-text: #555; /* 진한 회색 텍스트 (label, 아이콘 색상) */
+            --soft-gray-bg: #fafafa; /* 부드러운 회색 배경 (input) */
+            --preview-bg: #e6e6e6; /* 파일 프리뷰 바 배경색 */
         }
-        .container { 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* 전체 HTML, body 배경색 설정 (따뜻한 회색) */
+        html, body { 
+            width: 100%; 
+            height: 100%; 
+            font-family: 'Malgun Gothic', sans-serif; 
+            background-color: var(--light-color); /* 전체 페이지 배경을 따뜻한 회색으로 */
+            overflow: hidden; /* body의 스크롤바 숨김 */
+        }
+        
+        .hidden { display: none !important; }
+
+        /* 초기 설정 화면 컨테이너 */
+        .initial-container { 
             display: flex; justify-content: center; align-items: center; 
             width: 100%; min-height: 100vh; padding: 20px;
+            background-color: var(--light-color); /* 명시적으로 따뜻한 회색 배경 지정 */
         }
         .card { 
             width: 100%; max-width: 600px; 
-            background: var(--white-color); 
+            background: var(--white-color); /* 카드 배경은 하얀색 */
             padding: 30px; border-radius: 20px; 
             box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }
-        .hidden { display: none; }
 
         h1 { font-size: 2em; color: var(--dark-color); margin-bottom: 10px; text-align: center; }
         p { color: #666; text-align: center; margin-bottom: 30px; }
         
         .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; text-align: left; }
-        input[type="text"], input[type="password"], select, textarea {
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--dark-gray-text); text-align: left; }
+        input[type="text"], input[type="password"], select {
             width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 1em;
-            background-color: #fafafa;
+            background-color: var(--soft-gray-bg);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(253, 49, 46, 0.2); outline: none; }
-        textarea { resize: vertical; min-height: 80px; }
+        input:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(253, 49, 46, 0.2); outline: none; }
+        
         .select-group { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -51,6 +72,7 @@
         .btn:disabled { background-color: #aaa; cursor: not-allowed; }
         .btn:not(:disabled):hover { opacity: 0.9; transform: translateY(-2px); }
 
+        /* ===== 공통 FAB 스타일 (도움말 아이콘 포함) ===== */
         .fab {
             position: fixed;
             bottom: 30px;
@@ -76,95 +98,381 @@
             height: 32px;
             fill: white;
         }
+
+        /* ===== 채팅 화면 스타일 ===== */
+        #chat-screen { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
+        header {
+            flex-shrink: 0; background: var(--white-color); padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray); display: flex; align-items: center;
+        }
+        #exit-class-btn {
+            background: var(--danger-color); color: var(--white-color); border: none; font-size: 1.2em;
+            font-weight: bold; width: 40px; height: 40px; border-radius: 50%;
+            cursor: pointer; transition: opacity 0.3s;
+        }
+        #exit-class-btn:hover { opacity: 0.9; }
+
+        main { 
+            flex-grow: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column;
+            background-color: var(--model-bg); /* 채팅 콘텐츠 영역 배경을 따뜻한 회색으로 변경 */
+        }
+
+        .message { display: flex; margin-bottom: 20px; max-width: 85%; }
+        .message-bubble { padding: 12px 18px; border-radius: 20px; line-height: 1.6; color: var(--dark-color); }
+        .message-bubble img { max-width: 100%; border-radius: 10px; margin-top: 10px; }
+        .message-bubble pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 1em; }
+        
+        .user { align-self: flex-end; flex-direction: row-reverse; }
+        .user .message-bubble { 
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border-bottom-right-radius: 5px; 
+        }
+        .model { align-self: flex-start; }
+        .model .message-bubble { 
+            background-color: var(--white-color); /* AI 말풍선 배경을 하얀색으로 변경 */
+            border-bottom-left-radius: 5px; 
+        }
+
+        /* 말풍선 안 파일명 표시 스타일 */
+        .message-bubble .file-display-in-bubble {
+            margin-top: 10px; /* 텍스트와의 간격 */
+            padding: 8px 12px;
+            background-color: var(--preview-bg); /* 다이내믹 아일랜드와 유사한 배경색 */
+            border-radius: 15px;
+            font-size: 0.9em;
+            color: var(--dark-gray-text);
+            display: flex;
+            align-items: center;
+            gap: 8px; /* 아이콘과 텍스트 간격 */
+            max-width: fit-content; /* 내용에 맞춰 너비 조절 */
+            overflow: hidden; /* 넘치는 내용 숨기기 */
+            text-overflow: ellipsis; /* ...으로 표시 */
+            white-space: nowrap; /* 파일명 한 줄로 */
+        }
+        .message-bubble .file-display-in-bubble svg {
+            fill: var(--dark-gray-text);
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0; /* 아이콘이 줄어들지 않도록 */
+        }
+
+
+        .loading-dots { display: flex; gap: 6px; align-items: center; padding: 12px 0; }
+        .loading-dots .dot {
+            width: 8px; height: 8px; background-color: #aaa;
+            border-radius: 50%; animation: bounce 1.2s infinite ease-in-out;
+        }
+        .loading-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+        }
+
+        footer {
+            flex-shrink: 0; background: var(--white-color); border-top: 1px solid var(--light-gray);
+            padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        
+        /* 파일 프리뷰 바 스타일 (다이내믹 아일랜드) */
+        #file-preview-bar {
+            width: calc(100% - 40px); /* 푸터의 20px 좌우 패딩 고려 */
+            margin: 0 20px 10px 20px; /* 아래쪽 여백 추가 */
+            background-color: var(--preview-bg); /* 배경색 설정 */
+            padding: 8px 15px;
+            border-radius: 20px; /* 둥근 모서리 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(10px); /* 초기에는 살짝 아래에 위치 */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* 부드러운 그림자 */
+            pointer-events: none; /* 초기에는 클릭 이벤트 비활성화 */
+        }
+        #file-preview-bar.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto; /* 보일 때 클릭 이벤트 활성화 */
+        }
+        #file-name-display {
+            flex-grow: 1;
+            white-space: nowrap; /* 파일명 한 줄로 */
+            overflow: hidden; /* 넘치는 부분 숨김 */
+            text-overflow: ellipsis; /* ...으로 표시 */
+            font-size: 0.9em;
+            color: var(--dark-gray-text);
+        }
+        .clear-file-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        .clear-file-button svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--dark-gray-text);
+        }
+        .clear-file-button:hover {
+            background-color: var(--light-gray);
+        }
+
+
+        .shortcut-buttons {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            padding: 5px 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; 
+        }
+        .shortcut-buttons::-webkit-scrollbar {
+            display: none; 
+        }
+
+        .shortcut-buttons .shortcut-btn {
+            background-color: var(--light-gray);
+            color: var(--dark-gray-text);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            white-space: nowrap;
+        }
+        .shortcut-buttons .shortcut-btn:hover {
+            background-color: var(--medium-gray);
+        }
+
+        .chat-input-area {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chat-input {
+            flex-grow: 1; 
+            border: 1px solid #ccc; 
+            border-radius: 24px; 
+            padding: 12px 20px; 
+            font-size: 1em; 
+            resize: none;
+            height: 48px; /* 고정 높이 */
+            overflow-y: auto; 
+            line-height: 24px; 
+        }
+        #chat-input:focus { 
+            outline: none; 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 3px rgba(253, 49, 46, 0.2);
+        }
+        .chat-btn {
+            flex-shrink: 0; 
+            height: 48px; 
+            border-radius: 50%;
+            border: none; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            transition: background-color 0.3s;
+        }
+        .chat-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        /* 파일 업로드 버튼 스타일 */
+        #upload-btn { 
+            background-color: var(--model-bg); /* 따뜻한 회색 배경 */
+            width: 48px; 
+        }
+        #upload-btn svg {
+            fill: var(--dark-gray-text); /* 아이콘 색상 기본은 어두운 회색 계열 */
+        }
+        
+        #send-btn { 
+            background-color: var(--primary-color); 
+            color: var(--white-color);
+            border-radius: 24px; 
+            padding: 0 20px;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .chat-btn svg { width: 24px; height: 24px; }
     </style>
 </head>
-<!-- ▼▼▼ body 태그에서 login-active 클래스 제거 ▼▼▼ -->
 <body>
-<div class="container">
+<div class="initial-container" id="initial-setup-screen">
     <div class="card">
-        <div id="login-screen">
-            <h1>Welcome To AILMS!</h1>
-            <p>이름과 Google Gemini API Key를 입력해주세요.</p>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="user-name">이름</label>
-                    <input type="text" id="user-name" placeholder="김엘지" required>
+        <h1>Welcome To AILMS!</h1>
+        <p>정보를 입력해주세요.</p>
+        <form id="initial-setup-form">
+            <div class="form-group">
+                <label for="user-name">이름</label>
+                <input type="text" id="user-name" placeholder="김엘지" required>
+            </div>
+            <div class="form-group">
+                <label for="api-key">Google Gemini API Key</label>
+                <input type="password" id="api-key" placeholder="API Key를 입력하세요" required>
+            </div>
+            <div class="form-group select-group">
+                <div>
+                    <label for="school-level">학교</label>
+                    <select id="school-level">
+                        <option value="초등학교">초등학교</option>
+                        <option value="중학교">중학교</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label for="api-key">Google Gemini API Key</label>
-                    <input type="password" id="api-key" placeholder="API Key를 입력하세요" required>
+                <div>
+                    <label for="grade">학년</label>
+                    <select id="grade"></select>
                 </div>
-                <button type="submit" class="btn">AILMS 입장하기</button>
-            </form>
-        </div>
-        <div id="main-screen" class="hidden">
-            <h1 id="welcome-message"></h1>
-            <p>AI 선생님에게 요청할 문제의 범위를 선택해주세요.</p>
-            <form id="problem-form">
-                <div class="form-group select-group">
-                    <div>
-                        <label for="school-level">학교</label>
-                        <select id="school-level">
-                            <option value="초등학교">초등학교</option>
-                            <option value="중학교">중학교</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="grade">학년</label>
-                        <select id="grade"></select>
-                    </div>
-                    <div>
-                        <label for="subject">과목</label>
-                        <select id="subject">
-                            <option value="수학">수학</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="unit">단원</label>
-                        <select id="unit">
-                            <option value="1단원">1단원</option>
-                            <option value="2단원">2단원</option>
-                            <option value="3단원">3단원</option>
-                            <option value="4단원">4단원</option>
-                            <option value="5단원">5단원</option>
-                            <option value="6단원">6단원</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="details">상세 내용 (선택)</label>
-                    <textarea id="details" placeholder="예: 1단원 중 소인수분해 부분만 5문제 출제해줘. 난이도는 중급으로."></textarea>
-                </div>
-                <button id="generate-btn" type="submit" class="btn">문제 생성하기</button>
-            </form>
-            <button id="free-chat-btn" class="fab" title="자유롭게 대화하기">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"></path>
-                </svg>
-            </button>
-        </div>
+            </div>
+            <button type="submit" class="btn">AILMS 입장하기</button>
+        </form>
     </div>
 </div>
+
+<!-- 도움말 FAB 버튼 -->
+<button id="help-fab" class="fab hidden" title="도움말">
+    <!-- 일반적인 물음표 아이콘 SVG (Google Material Symbols - help) -->
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.92 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.15-2.95l.65-.66c.6-.6 1-1.42 1-2.29 0-1.38-1.12-2.5-2.5-2.5S9.5 7.12 9.5 8.5H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.25-.78 2.37-1.93 3.12z"/></svg>
+</button>
+
+<div id="chat-screen" class="hidden">
+    <header>
+        <button id="exit-class-btn" title="메인으로 돌아가기">&lt;</button>
+    </header>
+    <main id="chat-container"></main>
+    <footer>
+        <!-- 파일 프리뷰 바 -->
+        <div id="file-preview-bar" class="hidden">
+            <span id="file-name-display"></span>
+            <button id="clear-file-btn" class="clear-file-button">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>
+        </div>
+
+        <div class="shortcut-buttons">
+            <button id="shortcut-answer" class="shortcut-btn">정답을 알려주세요!</button>
+            <button id="shortcut-more-problem" class="shortcut-btn">추가 문제를 내주세요.</button>
+            <button id="shortcut-analyze" class="shortcut-btn">틀린 이유를 분석해주세요.</button>
+            <button id="shortcut-explain-easier" class="shortcut-btn">더 쉽게 설명해주세요!</button>
+        </div>
+        <div class="chat-input-area">
+            <input type="file" id="file-upload-input" class="hidden" accept="image/*, application/pdf">
+            <button id="upload-btn" class="chat-btn" title="파일 업로드">
+                <!-- 파일 아이콘 SVG (Material Design Icons - insert_drive_file) -->
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
+            </button>
+            <textarea id="chat-input" placeholder="AI 선생님과 대화해보세요!"></textarea>
+            <button id="send-btn" class="chat-btn" title="보내기">보내기</button>
+        </div>
+    </footer>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const loginScreen = document.getElementById('login-screen');
-        const mainScreen = document.getElementById('main-screen');
-        const loginForm = document.getElementById('login-form');
+        const initialSetupScreen = document.getElementById('initial-setup-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const initialSetupForm = document.getElementById('initial-setup-form');
         const apiKeyInput = document.getElementById('api-key');
         const userNameInput = document.getElementById('user-name');
-        const welcomeMessage = document.getElementById('welcome-message');
-        const problemForm = document.getElementById('problem-form');
-        const generateBtn = document.getElementById('generate-btn');
         const schoolLevelSelect = document.getElementById('school-level');
         const gradeSelect = document.getElementById('grade');
-        const freeChatBtn = document.getElementById('free-chat-btn');
-        let isProblemGenerated = false;
-        
+
+        // Chat UI elements
+        const chatContainer = document.getElementById('chat-container');
+        const exitBtn = document.getElementById('exit-class-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileUploadInput = document.getElementById('file-upload-input');
+        const chatInput = document.getElementById('chat-input');
+        const shortcutAnswerBtn = document.getElementById('shortcut-answer');
+        const shortcutMoreProblemBtn = document.getElementById('shortcut-more-problem');
+        const shortcutAnalyzeBtn = document.getElementById('shortcut-analyze'); 
+        // New shortcut button
+        const shortcutExplainEasierBtn = document.getElementById('shortcut-explain-easier'); // New button element
+
+        // Dynamic island elements
+        const filePreviewBar = document.getElementById('file-preview-bar');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const clearFileBtn = document.getElementById('clear-file-btn');
+        // Help FAB
+        const helpFab = document.getElementById('help-fab');
+
+
+        let chatHistory = [];
+        let selectedFile = null;
+        let currentSystemInstruction = "";
+
+        // --- System Instructions integrated into code ---
+        const SYSTEM_INSTRUCTION_TEMPLATE = `당신은 {{STUDENT_NAME}} 학생의 친절하고 박식한 AI 선생님입니다. 학생은 현재 {{SCHOOL_LEVEL}} {{GRADE}} 학생입니다. 학생이 학습에 대한 질문 뿐만 아니라 궁금한 점이나 일상적인 대화도 편하게 나눌 수 있도록 도와주세요. 항상 긍정적이고 도움이 되는 방식으로 소통해주세요. 문제에 대한 질문이 들어오면 해당 문제에 대한 해설과 풀이를 제공해주고, 추가 문제 요청이 있으면 새로운 문제를 생성하여 제공해주세요.`;
+        // --------------------------------------------------
+
+        // Load saved data from localStorage
         const savedApiKey = localStorage.getItem('geminiApiKey');
         const savedUserName = localStorage.getItem('userName');
+        const savedSchoolLevel = localStorage.getItem('schoolLevel');
+        const savedGrade = localStorage.getItem('grade');
+
+        // Initialize grade options based on default school level
+        updateGradeOptions(schoolLevelSelect.value);
+
+        // Populate initial setup form fields if data exists
         if (savedApiKey) { apiKeyInput.value = savedApiKey; }
         if (savedUserName) { userNameInput.value = savedUserName; }
+        if (savedSchoolLevel) { 
+            schoolLevelSelect.value = savedSchoolLevel; 
+            updateGradeOptions(savedSchoolLevel); 
+        }
+        if (savedGrade) { gradeSelect.value = savedGrade; }
 
+
+        // --- Initial Load Logic: Always show initial setup screen first ---
+        initialSetupScreen.classList.remove('hidden');
+        chatScreen.classList.add('hidden');
+        helpFab.classList.remove('hidden'); // Show help FAB on initial screen
+
+
+        // --- Event Listeners for Initial Setup Screen ---
+        schoolLevelSelect.addEventListener('change', (e) => {
+            updateGradeOptions(e.target.value);
+        });
+        
+        initialSetupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const apiKey = apiKeyInput.value.trim();
+            const userName = userNameInput.value.trim();
+            const schoolLevel = schoolLevelSelect.value;
+            const grade = gradeSelect.value;
+
+            if (apiKey && userName && schoolLevel && grade) {
+                // Save to localStorage for future visits
+                localStorage.setItem('geminiApiKey', apiKey);
+                localStorage.setItem('userName', userName);
+                localStorage.setItem('schoolLevel', schoolLevel);
+                localStorage.setItem('grade', grade);
+                startChatSession(userName, schoolLevel, grade);
+            } else {
+                alert('모든 필수 정보를 입력해주세요.');
+            }
+        });
+
+        // Function to update grade options based on school level
         function updateGradeOptions(level) {
             gradeSelect.innerHTML = '';
             let maxGrade = (level === '초등학교') ? 6 : 3;
@@ -176,114 +484,393 @@
             }
         }
 
-        schoolLevelSelect.addEventListener('change', (e) => {
-            updateGradeOptions(e.target.value);
-        });
-        
-        updateGradeOptions(schoolLevelSelect.value);
+        // Function to transition to chat screen and start session
+        function startChatSession(userName, schoolLevel, grade) {
+            // Hide initial setup, show chat screen
+            initialSetupScreen.classList.add('hidden');
+            chatScreen.classList.remove('hidden');
+            helpFab.classList.add('hidden'); // Hide help FAB when chat starts
 
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const apiKey = apiKeyInput.value.trim();
-            const userName = userNameInput.value.trim();
-            if (apiKey && userName) {
-                localStorage.setItem('geminiApiKey', apiKey);
-                localStorage.setItem('userName', userName);
-                showMainScreen(userName);
-            }
-        });
-
-        function showMainScreen(userName) {
-            welcomeMessage.textContent = `${userName}님, 환영합니다!`;
-            loginScreen.classList.add('hidden');
-            mainScreen.classList.remove('hidden');
-            // document.body.classList.add('login-active'); // 이 줄은 더 이상 필요 없습니다.
-        }
-
-        problemForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (isProblemGenerated) { window.location.href = 'class.html'; return; }
-            const schoolLevel = schoolLevelSelect.value;
-            const grade = gradeSelect.value;
-            const subject = document.getElementById('subject').value;
-            const unit = document.getElementById('unit').value;
-            const details = document.getElementById('details').value.trim();
-            let userPrompt = `${schoolLevel} ${grade} ${subject} ${unit} 범위의 문제를 출제해줘.`;
-            if (details) { userPrompt += ` 추가적으로, ${details}`; }
+            // Personalize system instruction
+            currentSystemInstruction = SYSTEM_INSTRUCTION_TEMPLATE
+                .replace('{{STUDENT_NAME}}', userName)
+                .replace('{{SCHOOL_LEVEL}}', schoolLevel)
+                .replace('{{GRADE}}', grade);
             
-            generateBtn.textContent = '문제 생성 중...';
-            generateBtn.disabled = true;
-            try {
-                const userName = localStorage.getItem('userName') || '학생';
-                // SYSTEM_INSTRUCTION은 problem-solving용으로 가정하고 사용
-                const personalizedInstruction = SYSTEM_INSTRUCTION.replace('{{STUDENT_NAME}}', userName);
-
-                const responseText = await callGeminiAPI(personalizedInstruction, userPrompt);
-                sessionStorage.setItem('initialProblem', responseText);
-                const initialHistory = [ 
-                    { role: 'user', parts: [{ text: userPrompt }] }, // 시스템 지침은 별도 파라미터로 보냄
-                    { role: 'model', parts: [{ text: responseText }] } 
-                ];
-                sessionStorage.setItem('chatHistory', JSON.stringify(initialHistory));
-                // 문제 생성 모드의 시스템 지침을 세션 스토리지에 저장
-                sessionStorage.setItem('currentSystemInstruction', personalizedInstruction);
-                sessionStorage.setItem('chatMode', 'problem'); // 모드 설정
-                isProblemGenerated = true;
-                window.location.href = 'class.html';
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                alert(`문제 생성에 실패했습니다: ${error.message}\nAPI 키 또는 프롬프트를 확인해주세요.`);
-                generateBtn.textContent = '문제 생성하기';
-                isProblemGenerated = false;
-            } finally {
-                generateBtn.disabled = false;
-            }
-        });
-        
-        freeChatBtn.addEventListener('click', () => {
-            const userName = localStorage.getItem('userName') || '학생';
-
-            // 1. 자유 채팅을 위한 시스템 지침을 명확히 정의합니다.
-            //    SYSTEM_INSTRUCTION_FREE_CHAT 상수가 system_instruction.js에 정의되어 있다고 가정합니다.
-            //    만약 없다면, 아래처럼 직접 문자열로 정의하거나 system_instruction.js에 추가해야 합니다.
-            const SYSTEM_INSTRUCTION_FREE_CHAT = `당신은 ${userName} 학생의 친절하고 박식한 AI 선생님입니다. 학생이 학습에 대한 자유로운 질문 뿐만 아니라 궁금한 점이나 일상적인 대화도 편하게 나눌 수 있도록 도와주세요. 항상 긍정적이고 도움이 되는 방식으로 소통해주세요.`;
-            // 위 지침이 system_instruction.js에 다음과 같이 정의되어 있다고 가정
-            // const SYSTEM_INSTRUCTION_FREE_CHAT = "당신은 {{STUDENT_NAME}} 학생의 친절하고 박식한 AI 선생님입니다. 학생이 자유롭게 질문할 수 있도록 도와주세요. 학습 외의 질문에도 친절하게 답변해주세요.";
-            // const personalizedSystemInstruction = SYSTEM_INSTRUCTION_FREE_CHAT.replace('{{STUDENT_NAME}}', userName);
-            const personalizedSystemInstruction = SYSTEM_INSTRUCTION_FREE_CHAT; // 위에서 이미 userName 포함된 형태로 정의함.
-
-            // 2. class.html에 처음 표시될 모델의 환영 메시지를 개인화합니다.
-            const personalizedInitialModelResponse = `${userName} 학생, 안녕하세요! 무엇이든 궁금한 점이 있다면 편하게 질문해주세요. 학습과 관련된 것이 아니어도 괜찮습니다.`;
+            // Generate initial welcome message from AI
+            const initialModelResponse = `${userName} 학생, 안녕하세요! 저는 ${schoolLevel} ${grade} 학생들을 돕는 AI 선생님입니다. 무엇이든 궁금한 점이 있다면 편하게 질문해주세요!`;
             
-            // 3. initialHistory는 대화 내용만 포함하고, 시스템 지침은 별도로 저장합니다.
-            const initialHistory = [
-                { role: 'user', parts: [{ text: "안녕하세요, 선생님! 자유롭게 대화하고 싶습니다." }] },
-                { role: 'model', parts: [{ text: personalizedInitialModelResponse }] }
+            // Initialize chat history with a placeholder user message and the AI's welcome
+            chatHistory = [
+                { role: 'user', parts: [{ text: `AI 선생님, 안녕하세요! 저는 ${userName}입니다.` }] },
+                { role: 'model', parts: [{ text: initialModelResponse }] }
             ];
 
-            sessionStorage.setItem('initialProblem', personalizedInitialModelResponse); // class.html에서 첫 메시지로 사용
-            sessionStorage.setItem('chatHistory', JSON.stringify(initialHistory));
-            // 4. class.html에서 API 호출 시 사용할 시스템 지침을 별도로 저장합니다.
-            sessionStorage.setItem('currentSystemInstruction', personalizedSystemInstruction);
-            sessionStorage.setItem('chatMode', 'free'); // 자유 채팅 모드임을 표시
+            // Render the initial chat history
+            renderChatHistory(chatHistory);
+        }
 
-            window.location.href = 'class.html';
+        // --- Event Listeners for Chat Screen ---
+        exitBtn.addEventListener('click', () => {
+            if (confirm('대화를 종료하고 처음 설정 화면으로 돌아가시겠습니까?')) {
+                // Clear session history for a clean chat restart
+                sessionStorage.clear(); 
+                
+                // Clear local variables
+                chatHistory = []; 
+                selectedFile = null; 
+                currentSystemInstruction = "";
+
+                // Hide chat screen, show initial setup screen
+                chatScreen.classList.add('hidden');
+                initialSetupScreen.classList.remove('hidden');
+                helpFab.classList.remove('hidden'); // Show help FAB when returning to initial screen
+
+                // Re-populate initial setup form fields from localStorage (if values exist)
+                apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
+                userNameInput.value = localStorage.getItem('userName') || '';
+                const savedSchool = localStorage.getItem('schoolLevel') || '초등학교';
+                schoolLevelSelect.value = savedSchool;
+                updateGradeOptions(savedSchool); 
+                gradeSelect.value = localStorage.getItem('grade') || '1학년'; 
+
+                // Reset file preview bar if it was visible
+                hideFilePreview();
+            }
         });
         
-        async function callGeminiAPI(systemInstruction, userPrompt) {
+        // Help FAB click event
+        helpFab.addEventListener('click', () => {
+            window.open('https://www.lge.com/', '_blank'); // Open lge.com in a new tab
+        });
+
+        uploadBtn.addEventListener('click', () => fileUploadInput.click()); 
+        sendBtn.addEventListener('click', handleSend);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                handleSend(); 
+            }
+        });
+
+        // File input change event
+        fileUploadInput.addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                uploadBtn.style.backgroundColor = 'var(--primary-color)';
+                uploadBtn.querySelector('svg').style.fill = 'white';
+                showFilePreview(selectedFile.name);
+            } else { // File selection cancelled
+                uploadBtn.style.backgroundColor = 'var(--model-bg)';
+                uploadBtn.querySelector('svg').style.fill = 'var(--dark-gray-text)'; 
+                hideFilePreview();
+            }
+        });
+
+        // Clear file button event
+        clearFileBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileUploadInput.value = ''; // Clear the input so same file can be selected again
+            uploadBtn.style.backgroundColor = 'var(--model-bg)';
+            uploadBtn.querySelector('svg').style.fill = 'var(--dark-gray-text)';
+            hideFilePreview();
+        });
+
+
+        shortcutAnswerBtn.addEventListener('click', () => {
+            chatInput.value = '정답을 알려주세요!';
+            handleSend();
+        });
+
+        shortcutMoreProblemBtn.addEventListener('click', () => {
+            chatInput.value = '추가 문제를 내주세요.';
+            handleSend();
+        });
+
+        shortcutAnalyzeBtn.addEventListener('click', () => {
+            chatInput.value = '틀린 이유를 분석해주세요.';
+            handleSend();
+        });
+
+        // New shortcut button event listener
+        shortcutExplainEasierBtn.addEventListener('click', () => {
+            chatInput.value = '더 쉽게 설명해주세요!';
+            handleSend();
+        });
+
+        async function handleSend() {
+            const userText = chatInput.value.trim();
+            if (!userText && !selectedFile) return;
+
+            setInteractionState(true);
+            
+            // Prepare user's message parts for display and API
+            const userPartsForDisplay = []; // For appendMessage
+            const userPartsForAPI = []; // For chatHistory.push (stripped for API compatibility)
+
+            if (userText) { 
+                userPartsForDisplay.push({ "type": "text", "content": userText });
+                userPartsForAPI.push({ "text": userText });
+            }
+            
+            if (selectedFile) {
+                try {
+                    const base64Data = await fileToBase64(selectedFile);
+                    userPartsForDisplay.push({ "type": "file", "content": selectedFile, "name": selectedFile.name, "mime_type": selectedFile.type });
+                    
+                    // API로 보낼 payload에서는 file_name을 제거합니다.
+                    userPartsForAPI.push({ "inline_data": { "mime_type": selectedFile.type, "data": base64Data } }); 
+                } catch (error) {
+                    console.error("File to Base64 Error:", error);
+                    appendMessage('model', [{ "type": "text", "content": "파일을 처리하는 중 오류가 발생했습니다. 다시 시도해주세요." }]);
+                    setInteractionState(false);
+                    return;
+                }
+            }
+
+            // Append to UI immediately
+            appendMessage('user', userPartsForDisplay);
+
+            // Add to chat history for API context (using userPartsForAPI)
+            chatHistory.push({ "role": "user", "parts": userPartsForAPI });
+            
+            // Clear input and file selection UI
+            chatInput.value = '';
+            selectedFile = null;
+            fileUploadInput.value = ''; 
+            uploadBtn.style.backgroundColor = 'var(--model-bg)';
+            uploadBtn.querySelector('svg').style.fill = 'var(--dark-gray-text)';
+            hideFilePreview();
+
+
+            showLoadingIndicator(true);
+
+            try {
+                // chatHistory를 필터링하여 API에 맞는 형태로 전달합니다.
+                const historyForApiCall = chatHistory.map(entry => {
+                    const apiParts = entry.parts.map(part => {
+                        if (part.text) {
+                            return { text: part.text };
+                        } else if (part.inline_data) {
+                            // file_name은 UI용이므로 API 호출 시 제거
+                            return { inline_data: part.inline_data };
+                        }
+                        return null; // Should not happen if structure is clean
+                    }).filter(part => part !== null);
+                    return { role: entry.role, parts: apiParts };
+                });
+
+                const responseText = await callGeminiAPI(currentSystemInstruction, historyForApiCall);
+                chatHistory.push({ "role": "model", "parts": [{ "text": responseText }] });
+                appendMessage('model', [{ "type": "text", "content": responseText }]); // Append model response to UI
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                appendMessage('model', [{ "type": "text", "content": `오류가 발생했습니다: ${error.message}` }]);
+            } finally {
+                showLoadingIndicator(false);
+                setInteractionState(false);
+            }
+        }
+
+        // Modified appendMessage to handle multiple parts (text, image, file info) for UI rendering
+        function appendMessage(role, parts) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            
+            let hasTextContent = false;
+            let hasFileContent = false;
+
+            parts.forEach(part => {
+                if (part.type === "text" && part.content) { // For text content
+                    const pre = document.createElement('pre');
+                    pre.textContent = part.content;
+                    bubble.appendChild(pre);
+                    hasTextContent = true;
+                } else if (part.type === "file") { // For file content (image or non-image)
+                    const fileMimeType = part.mime_type;
+                    const fileName = part.name;
+
+                    if (fileMimeType && fileMimeType.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        // Use URL.createObjectURL for new File objects, or data URL for history
+                        img.src = part.content instanceof File ? URL.createObjectURL(part.content) : `data:${part.mime_type};base64,${part.inline_data.data}`;
+                        img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
+                        bubble.appendChild(img);
+                        hasFileContent = true;
+                    } else if (fileName) { // Non-image file, display as text + icon
+                        const fileDisplayDiv = document.createElement('div');
+                        fileDisplayDiv.className = 'file-display-in-bubble';
+                        fileDisplayDiv.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
+                            <span>${fileName}</span>
+                        `;
+                        bubble.appendChild(fileDisplayDiv);
+                        hasFileContent = true;
+                    }
+                } else if (part.inline_data && part.file_name) { // For history re-render of non-image files from API payload format
+                    // This is for rendering from chatHistory's structure directly, where file_name is available
+                    const fileMimeType = part.inline_data.mime_type;
+                    const fileName = part.file_name;
+
+                    if (fileMimeType && fileMimeType.startsWith('image/')) {
+                         const img = document.createElement('img');
+                         img.src = `data:${fileMimeType};base64,${part.inline_data.data}`;
+                         img.onload = () => chatContainer.scrollTop = chatContainer.scrollHeight;
+                         bubble.appendChild(img);
+                         hasFileContent = true;
+                    } else if (fileName) {
+                        const fileDisplayDiv = document.createElement('div');
+                        fileDisplayDiv.className = 'file-display-in-bubble';
+                        fileDisplayDiv.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H520q-33 0-56.5-23.5T400-600V-800H240v720Zm240-480Z"/></svg>
+                            <span>${fileName}</span>
+                        `;
+                        bubble.appendChild(fileDisplayDiv);
+                        hasFileContent = true;
+                    }
+                }
+            });
+
+            // Only append message div if there's any content to display
+            if (hasTextContent || hasFileContent) {
+                messageDiv.appendChild(bubble);
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        // renderChatHistory now uses the unified appendMessage with adjusted part structure
+        function renderChatHistory(history) {
+            chatContainer.innerHTML = ''; // Clear existing messages
+            history.forEach(message => {
+                const partsForDisplay = [];
+                message.parts.forEach(part => {
+                    if (part.text) {
+                        partsForDisplay.push({ type: "text", content: part.text });
+                    }
+                    if (part.inline_data) {
+                        // Pass inline_data, name (from file_name in history), and mime_type for re-rendering file content
+                        partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.file_name, mime_type: part.inline_data.mime_type });
+                    }
+                });
+                
+                if (partsForDisplay.length > 0) { // Only render if there's actual content to show
+                    appendMessage(message.role, partsForDisplay);
+                }
+            });
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showLoadingIndicator(show) {
+            let indicator = document.getElementById('loading-indicator');
+            if (show) {
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.id = 'loading-indicator';
+                    indicator.className = 'message model';
+                    indicator.innerHTML = `
+                        <div class="message-bubble">
+                            <div class="loading-dots">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.appendChild(indicator);
+                }
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } else {
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
+        async function callGeminiAPI(systemInstruction, history) {
             const apiKey = localStorage.getItem('geminiApiKey');
-            if (!apiKey) throw new Error('API 키가 설정되지 않았습니다.');
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            const requestBody = { "system_instruction": { "parts": [{"text": systemInstruction}] }, "contents": [{ "parts": [{"text": userPrompt}] }] };
-            const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+            if (!apiKey) throw new Error('API 키가 없습니다.');
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            
+            // history (contents)를 Gemini API가 요구하는 형식으로 변환
+            const contentsForAPI = history.map(entry => {
+                const apiParts = entry.parts.map(part => {
+                    if (part.text) {
+                        return { text: part.text };
+                    } else if (part.inline_data) {
+                        // inline_data만 포함하고 file_name은 제외 (API 호환성)
+                        return { inline_data: part.inline_data };
+                    }
+                    return null; // 유효하지 않은 파트 필터링
+                }).filter(part => part !== null);
+
+                return {
+                    role: entry.role,
+                    parts: apiParts
+                };
+            });
+
+            const requestBody = { "contents": contentsForAPI };
+            
+            if (systemInstruction) {
+                requestBody.system_instruction = { "parts": [{"text": systemInstruction}] };
+            }
+
+            const response = await fetch(API_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(requestBody) 
+            });
+
+            if (!response.ok) { 
+                const errorData = await response.json(); 
+                throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); 
+            }
             const data = await response.json();
-            if (!response.ok) { throw new Error(data.error?.message || `HTTP error! status: ${response.status}`); }
+
             if (data.candidates && data.candidates[0]?.content?.parts) {
                 return data.candidates[0].content.parts[0].text;
             } else {
-                if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {  throw new Error('응답이 안전상의 이유로 차단되었습니다. 더 구체적인 내용을 입력해주세요.'); }
+                if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
+                    throw new Error('응답이 안전상의 이유로 차단되었습니다. 더 구체적인 내용을 입력해주세요.');
+                }
                 throw new Error('API로부터 유효한 응답을 받지 못했습니다.');
             }
+        }
+
+        function setInteractionState(disabled) {
+            chatInput.disabled = disabled;
+            sendBtn.disabled = disabled;
+            uploadBtn.disabled = disabled;
+            shortcutAnswerBtn.disabled = disabled;
+            shortcutMoreProblemBtn.disabled = disabled;
+            shortcutAnalyzeBtn.disabled = disabled;
+            shortcutExplainEasierBtn.disabled = disabled; // New button disabled state
+        }
+
+        // Functions for file preview bar
+        function showFilePreview(fileName) {
+            fileNameDisplay.textContent = fileName;
+            filePreviewBar.classList.add('visible');
+            filePreviewBar.classList.remove('hidden');
+        }
+
+        function hideFilePreview() {
+            filePreviewBar.classList.remove('visible');
+            filePreviewBar.classList.add('hidden');
+            fileNameDisplay.textContent = '';
         }
     });
 </script>

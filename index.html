@@ -464,21 +464,14 @@
         let selectedFile = null;
         let currentSystemInstruction = "";
 
-        // --- System Instructions integrated into code ---
-        const SYSTEM_INSTRUCTION_TEMPLATE = `당신은 {{STUDENT_NAME}} 학생의 친절하고 박식한 AI 선생님입니다. 학생은 현재 {{SCHOOL_LEVEL}} {{GRADE}} 학생입니다. 학생이 학습에 대한 질문 뿐만 아니라 궁금한 점이나 일상적인 대화도 편하게 나눌 수 있도록 도와주세요. 항상 긍정적이고 도움이 되는 방식으로 소통해주세요. 문제에 대한 질문이 들어오면 해당 문제에 대한 해설과 풀이를 제공해주고, 추가 문제 요청이 있으면 새로운 문제를 생성하여 제공해주세요.`;
-        // --------------------------------------------------
+        const SYSTEM_INSTRUCTION_TEMPLATE = `당신은 {{STUDENT_NAME}} 학생의 친절하고 박식한 AI 선생님입니다. 학생은 현재 {{SCHOOL_LEVEL}} {{GRADE}} 학생입니다. 학생이 학습에 대한 질문을 편하게 나눌 수 있도록 도와주세요. 항상 긍정적이고 도움이 되는 방식으로 소통해주세요. 문제에 대한 질문이 들어오면 해당 문제에 대한 해설과 풀이를 제공해주고, 추가 문제 요청이 있으면 새로운 문제를 생성하여 제공해주세요.`;
 
-        // --- Dynamic app height for mobile viewport consistency ---
-        // body의 min-height를 설정하여 모바일 주소창 문제를 완화합니다.
         function setAppHeight() {
             document.body.style.minHeight = `${window.innerHeight}px`;
-            // 추가적으로, 채팅 화면이 활성화되었을 때만 이 높이를 적용할 수도 있습니다.
-            // 하지만 body에 min-height를 설정하면 전역적으로 잘 작동하는 경우가 많습니다.
         }
 
         setAppHeight();
         window.addEventListener('resize', setAppHeight);
-        // ---------------------------------------------------------
 
 
         // Load saved data from localStorage
@@ -606,7 +599,7 @@
             if (selectedFile) {
                 // Check if it's an image file
                 if (!selectedFile.type.startsWith('image/')) {
-                    alert('사진 파일만 업로드할 수 있습니다.');
+                    alert('이미지만 업로드할 수 있습니다!');
                     selectedFile = null;
                     fileUploadInput.value = ''; // Clear the input
                     uploadBtn.style.backgroundColor = 'var(--model-bg)';
@@ -768,7 +761,7 @@
                             }, 1500);
                         }).catch(err => {
                             console.error('Failed to copy text: ', err);
-                            alert('텍스트 복사에 실패했습니다. HTTPS 환경 또는 로컬호스트에서 실행 중인지 확인해주세요.'); 
+                            alert('텍스트 복사에 실패했습니다.'); 
                             setTimeout(() => { 
                                 copyBtn.textContent = '복사';
                                 messageDiv.classList.remove('active');
@@ -809,9 +802,6 @@
                     if (part.text) {
                         partsForDisplay.push({ type: "text", content: part.text });
                     }
-                    // For re-rendering, `part.name` might be undefined if not explicitly stored in chatHistory
-                    // The `userPartsForAPI` in handleSend doesn't save `name`.
-                    // So, for consistent re-rendering, we'll try to get `name` from `part.name` if present, or create a placeholder.
                     if (part.inline_data && part.inline_data.mime_type.startsWith('image/')) {
                         partsForDisplay.push({ type: "file", inline_data: part.inline_data, name: part.name || "Uploaded Image", mime_type: part.inline_data.mime_type });
                     }
@@ -862,7 +852,7 @@
         async function callGeminiAPI(systemInstruction, history) {
             const apiKey = localStorage.getItem('geminiApiKey');
             if (!apiKey) throw new Error('API 키가 없습니다.');
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             
             // Prepare contents for API call - only text and inline_data
             const contentsForAPI = history.map(entry => {

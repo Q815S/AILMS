@@ -852,7 +852,7 @@
         async function callGeminiAPI(systemInstruction, history) {
             const apiKey = localStorage.getItem('geminiApiKey');
             if (!apiKey) throw new Error('API 키가 없습니다.');
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
             
             // Prepare contents for API call - only text and inline_data
             const contentsForAPI = history.map(entry => {
